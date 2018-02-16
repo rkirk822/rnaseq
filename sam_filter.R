@@ -27,8 +27,8 @@
 # cb_p036_2_mapped_Aligned.out.filtered,
 
 
-# source('file_checks.R')
-source('/Users/nelsonlab/Documents/Toolboxes/code_in_progress/file_checks.R')
+source('/Volumes/CodingClub1/RNAseq/code/file_checks.R')
+# source('/Users/nelsonlab/Documents/Toolboxes/code_in_progress/file_checks.R')
 
 
 sam_filter = function(fileIn, fileOut, verbose=FALSE, deleteTemps=TRUE) {

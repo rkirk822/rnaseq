@@ -21,8 +21,8 @@
 
 ###################################################
 # # Stuff to set
-pathRaw='/Volumes/CodingClub1/RNAseq/NucSeq/raw/'
-pathTrimmed='/Volumes/CodingClub1/RNAseq/NucSeq/trimmed/trimmed_m20_q20/'
+pathRaw='/Volumes/CodingClub1/RNAseq/RNAseq_comp_NucSeq/raw/'
+pathTrimmed='/Volumes/CodingClub1/RNAseq/RNAseq_comp_NucSeq/trimmed/'
 # pathRaw='/Volumes/CodingClub1/RNAseq/TTX/raw/'
 # pathTrimmed='/Volumes/CodingClub1/RNAseq/TTX/trimmed/trimmed_m20_q20/'
 extension=.fastq.gz
@@ -38,7 +38,8 @@ fileSuffix='_m20_q20' # to distinguish files trimmed with different parameter va
 cores=8 # number of available cores
 ###################################################
 
-sampleNames='AACTCG_S2_R1_001 ATGACA_S7_R1_001 CTCCTA_S3_R1_001 GTCGAG_S5_R1_001 ACAACA_S6_R1_001 CCAACA_S10_R1_001 CTCGAA_S12_R1_001 TCTAGG_S11_R1_001 ATCGTC_S9_R1_001 CGTCTA_S1_R1_001 GCACAC_S8_R1_001 TCTTCG_S4_R1_001'
+sampleNames='cb_p033_4_13_S13_R1_001 cb_p033_5_14_S14_R1_001 cb_p033_6_15_S15_R1_001 cb_p033_7_16_S16_R1_001 L4_RORht_1_AAGACG-_S5_R1_001 L4_RORht_2_CCTCGG-_S6_R1_001 L4_RORht_3_GGATGT-_S7_R1_001 L4_RORht_4_TTCGCT-_S8_R1_001'
+# sampleNames='AACTCG_S2_R1_001 ATGACA_S7_R1_001 CTCCTA_S3_R1_001 GTCGAG_S5_R1_001 ACAACA_S6_R1_001 CCAACA_S10_R1_001 CTCGAA_S12_R1_001 TCTAGG_S11_R1_001 ATCGTC_S9_R1_001 CGTCTA_S1_R1_001 GCACAC_S8_R1_001 TCTTCG_S4_R1_001'
 # sampleNames='PVCtlEarly_1 PVCtlEarly_2 PVCtlEarly_3 PVCtlLate_1 PVCtlLate_2 PVCtlLate_3 PVCtlLate_4 PVTTXEarly_1 PVTTXEarly_2 PVTTXEarly_3 PVTTXLate_1 PVTTXLate_2 PVTTXLate_3 PVTTXLate_4'
 # sampleNames='EMXCtlEarly_1 EMXCtlEarly_2 EMXCtlEarly_3 EMXCtlEarly_4 EMXCtlLate_1 EMXCtlLate_2 EMXCtlLate_3 EMXCtlLate_4 EMXTTXEarly_1 EMXTTXEarly_2 EMXTTXEarly_3 EMXTTXLate_1 EMXTTXLate_2 EMXTTXLate_3 EMXTTXLate_4'
 # sampleNames='BF_RORbHTp200_1 BF_RORbHTp200_2 BF_RORbHTp200_3 BF_RORbHTp200_4 BF_RORbHTp2_1 BF_RORbHTp2_2 BF_RORbHTp2_3 BF_RORbHTp2_4 BF_RORbHTp30_1 BF_RORbHTp30_2 BF_RORbHTp30_3 BF_RORbHTp30_4 BF_RORbHTp7_1 BF_RORbHTp7_2 BF_RORbHTp7_3 BF_RORbHTp7_4 BF_RORbKOp2_1 BF_RORbKOp2_2 BF_RORbKOp2_3 BF_RORbKOp2_4 BF_RORbKOp30_1 BF_RORbKOp30_2 BF_RORbKOp30_3 BF_RORbKOp30_4 BF_RORbKOp7_1 BF_RORbKOp7_2 BF_RORbKOp7_3 BF_RORbKOp7_4'
@@ -62,7 +63,10 @@ do
 
     infile=$pathRaw$sn$extension
 
-    cutadapt -a $adapterName=$adapter -a $adapterName2=$adapter2 $infile -o $outfile --trim-n -q $qualityCutoff -m $minLen -n $nAdapt -j $cores > $reportfile
+    # cutadapt -a $adapterName=$adapter -a $adapterName2=$adapter2 $infile -o $outfile --trim-n -q $qualityCutoff -m $minLen -n $nAdapt -j $cores > $reportfile
+
+    # Suddenly there's no -j option??  Is this because I'm running under ATAC user for the first time and it's using a different version of cutadapt, maybe?  It's using 1.8.1.
+    cutadapt -a $adapterName=$adapter -a $adapterName2=$adapter2 $infile -o $outfile --trim-n -q $qualityCutoff -m $minLen -n $nAdapt > $reportfile
 
 done
 

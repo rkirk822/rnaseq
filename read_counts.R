@@ -11,7 +11,7 @@
 
 read_counts = function(filenames) {
 
-    source('/Users/nelsonlab/Documents/Toolboxes/rna-seq/file_checks.R')
+    source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
 
     countVec = vector()
     samplenames = filenames

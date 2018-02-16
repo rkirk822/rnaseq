@@ -46,7 +46,7 @@ bam_to_bed = function(filenames, bedtoolsPath = "", bedDest = "./" ) {
         writeLines(paste("Creating file ", fBed, "...", sep=""), sep="")
         if ( file_checks(fBed, shouldExist=FALSE) ) {
             tStart = proc.time()[3]
-            system2(paste(bedtoolsPath, "bamToBed", sep=""), args = c("-i', f), stdout = fBed)
+            system2(paste(bedtoolsPath, "bamToBed", sep=""), args = c("-i", f), stdout = fBed)
             tElapsed = proc.time()[3] - tStart
             writeLines(paste("done (", round(tElapsed/60, digits=2), "m).", sep=""))
         }

@@ -6,7 +6,7 @@
 #
 #
 # USAGE:
-# > bedgraphToBigWig(filenames, ucscPath="/opt/UCSC/", genomeSizeFile="/path/to/genomeSizeFile.txt")
+# > bedgraphToBigWig(filenames, ucscPath="/opt/UCSCtools/", genomeSizeFile="/path/to/genomeSizeFile.txt")
 #
 # TIME:
 # On yasuimac: ~1m per file.
@@ -18,11 +18,11 @@
 # $ system2('/opt/UCSC/wigToBigWig', args=c('samplename.gencov.bedgraph', '/path/to/genomeSizeFile.txt', samplename.bigwig))
 
 
-bedgraphToBigWig = function(filenames, ucscPath, genomeSizeFile, bedgraphDest="./") {
+bedgraphToBigWig = function(filenames, ucscPath, genomeSizeFile, bwDest="./") {
 
     # Won't be necessary when this is in package
-    source("/Users/nelsonlab/Documents/Toolboxes/code/file_checks.R")
-    source("/Users/nelsonlab/Documents/Toolboxes/code/dir_check.R")
+    source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
+    source("/Volumes/CodingClub1/RNAseq/code/dir_check.R")
     library(tools)
 
     # Check arguments

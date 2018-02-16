@@ -5,12 +5,15 @@
 # you have a csv file with two columns with the old and new filenames.  You can tell it
 # to assume there's a suffix to the filenames, but it has to be the same for all files
 # (both old and new names).
+#
+# Note that fileSuffix should include the extension.
 
-rename_files = function(nameFile, fileSuffix='', header=FALSE, comment.char='#') {
+rename_files = function(nameFile, fileSuffix="", header=FALSE, comment.char="#") {
 
    # Get the old and new file prefixes and append suffix
+   # Also trim white space from new names, as it's almost certainly accidentally in the nameFile
     allNames = read.csv(nameFile, comment.char=comment.char, header=header)
-    paster=function(x){paste(x, fileSuffix, sep='')}
+    paster=function(x){paste(trimws(x), fileSuffix, sep="")}
     allNames = sapply(allNames, paster)
     
     for (i in 1:dim(allNames)[1]) {
@@ -20,17 +23,17 @@ rename_files = function(nameFile, fileSuffix='', header=FALSE, comment.char='#')
         
         # Check that old file exists
         if ( !file.exists(oldName) ) {
-            writeLines(paste('File', oldName, 'does not exist; skipping.'))
+            writeLines(paste("File", oldName, "does not exist; skipping."))
             next
         }
     
         # Don't overwrite anything
         if ( file.exists(newName) ) {
-            writeLines(paste('File', oldName, 'will not be re-named, as file', newName, 'already exists.'))
+            writeLines(paste("File", oldName, "will not be re-named, as file", newName, "already exists."))
             next
         }
-    
-        writeLines(paste('Re-naming', oldName, 'to', newName))
+        
+        writeLines(paste("Re-naming", oldName, "to", newName))
         file.rename(oldName, newName)
     
     }

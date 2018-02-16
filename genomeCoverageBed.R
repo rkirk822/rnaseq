@@ -4,7 +4,7 @@
 #
 # For each specified bed or bam file, apply the bedtools genomeCoverageBed function to get
 # a bedgraph file with histogram of coverage values.  Right now the only flexibility I'm
-# giving you is choose bam or bed as your input, but I can incorporate other arguments to
+# giving you is to choose bam or bed as your input, but I can incorporate other arguments to
 # genomeCoverageBed.
 #
 # Note that it's a bit faster with bed than bam input files.
@@ -28,7 +28,7 @@
 # $ /opt/bedtools2/bin/genomeCoverageBed -g /path/to/genome_size.tab.txt -ibam samplename_mapped_Aligned_out.bam -bg > samplename.gencov.bedgraph
 
 
-genomeCoverageBed = function(filenames, genomeSizeFile, bedtoolsPath="", bedgraphDest='./') {
+genomeCoverageBed = function(filenames, genomeSizeFile, bedtoolsPath="", bedgraphDest="./") {
 
     # Won't be necessary when this is in package
     source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
