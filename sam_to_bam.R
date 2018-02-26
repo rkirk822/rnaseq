@@ -43,62 +43,65 @@
 # samtools index samplename_mapped_Aligned.out.filter.sorted.bam
 
 
-sam_to_bam = function(filenames, fileFilteredSuffix='.filtered.sam', fileBamSuffix='.filtered', fileFilteredDest='./', fileBamDest='./', filterVerbose=FALSE) {
+sam_to_bam = function(filenames, fileFilteredSuffix=".filtered.sam", fileBamSuffix=".filtered", fileFilteredDest="./", fileBamDest="./", filterVerbose=FALSE) {
     
     # Won't be necessary when this is in package
-    library('Rsamtools')
-    # source('/Users/nelsonlab/Documents/Toolboxes/code/file_checks.R')
-    # source('/Users/nelsonlab/Documents/Toolboxes/code/sam_filter.R')
-    source('/Volumes/CodingClub1/RNAseq/code/file_checks.R')
-    source('/Volumes/CodingClub1/RNAseq/code/sam_filter.R')
+    library("Rsamtools")
+    # source("/Users/nelsonlab/Documents/Toolboxes/code/file_checks.R")
+    # source("/Users/nelsonlab/Documents/Toolboxes/code/sam_filter.R")
+    source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
+    source("/Volumes/CodingClub1/RNAseq/code/sam_filter.R")
     
     # Check that destination directories exist
-    if ( !dir.exists(fileFilteredDest) ) {stop(paste('Directory', fileFilteredDest, 'does not exist.'))}
-    if ( !dir.exists(fileBamDest) ) {stop(paste('Directory', fileBamDest, 'does not exist.'))}
+    if ( !dir.exists(fileFilteredDest) ) {stop(paste("Directory", fileFilteredDest, "does not exist."))}
+    if ( !dir.exists(fileBamDest) ) {stop(paste("Directory", fileBamDest, "does not exist."))}
     # Make sure they have a / at the end
-    if ( ! substr(fileFilteredDest, nchar(fileFilteredDest), nchar(fileFilteredDest))=='/') { fileFilteredDest = paste(fileFilteredDest, '/', sep='') }
-    if ( ! substr(fileBamDest, nchar(fileBamDest), nchar(fileBamDest))=='/') { fileBamDest = paste(fileBamDest, '/', sep='') }
+    if ( ! substr(fileFilteredDest, nchar(fileFilteredDest), nchar(fileFilteredDest))=="/") { fileFilteredDest = paste(fileFilteredDest, "/", sep="") }
+    if ( ! substr(fileBamDest, nchar(fileBamDest), nchar(fileBamDest))=="/") { fileBamDest = paste(fileBamDest, "/", sep="") }
     
     for (f in filenames) {
         
-        writeLines(paste('\nProcessing file:', f))
-        flush.console()
+        writeLines("\n")
         
         # Make sure file exists and has extension .sam
-        if ( ! file_checks(f, extension = '.sam') ) { next }
+        if ( ! file_checks(f, extension = ".sam", verbose = TRUE) ) { next }
         flush.console()
+        
+        writeLines(paste("Processing file:", f))
+        flush.console()
+
         
         ###########################################################################
         # Remove mitochondrial, unmapped, and random chromosomes with sam_filter().
         ###########################################################################
-        writeLines('Filtering...', sep='')
-        flush.console()
         # Define name of filtered file and check that it doesn't already exist
-        fileFiltered = sub('.sam', fileFilteredSuffix, f)
-        fileFilteredFull = paste(fileFilteredDest, fileFiltered, sep='')
-        if ( file_checks(fileFilteredFull, shouldExist=FALSE) ){
+        fileFiltered = sub(".sam", fileFilteredSuffix, f)
+        fileFilteredFull = paste(fileFilteredDest, fileFiltered, sep="")
+        if ( file_checks(fileFilteredFull, shouldExist=FALSE, verbose=TRUE) ){
+            writeLines("Filtering...", sep="")
+            flush.console()
             # Announce output file name
-            writeLines(paste('file will be saved as', fileFilteredFull), sep='')
+            writeLines(paste("file will be saved as", fileFilteredFull), sep="")
             flush.console()
             # Call and time sam_filter()
             tStartFilter = proc.time()[3]
             sam_filter(f, fileFilteredFull, verbose = filterVerbose)
             tElapsedFilter = proc.time()[3] - tStartFilter
             # Announce you're done
-            writeLines(paste('...done (', round(tElapsedFilter/60, digits=2), 'm).', sep=''))
+            writeLines(paste("...done (", round(tElapsedFilter/60, digits=2), "m).", sep=""))
             flush.console()
-        }
+        } else { writeLines("Not filtering.") }
         
         ###############################################################################
         # Convert to sam to bam, sort, and generate index file.  All donw with asBam().
         ###############################################################################
-        writeLines('Converting to bam, sorting, and generating index file...', sep='')
-        flush.console()
         # Define name of bam file and check that it doesn't already exist
-        fileBamFull = paste(fileBamDest, sub(fileFilteredSuffix, fileBamSuffix, fileFiltered), sep='')
-        if ( file_checks(fileBamFull, shouldExist=FALSE) ) {
+        fileBamFull = paste(fileBamDest, sub(fileFilteredSuffix, fileBamSuffix, fileFiltered), sep="")
+        if ( file_checks(fileBamFull, shouldExist=FALSE, verbose=TRUE) ) {
+            writeLines("Converting to bam, sorting, and generating index file...", sep="")
+            flush.console()
             # Announce output file names
-            flush.console(); writeLines(paste('file will be saved as', fileBamFull, '.bam', sep=''), sep='')
+            flush.console(); writeLines(paste("file will be saved as", fileBamFull, ".bam", sep=""), sep="")
             flush.console()
             # Call and time asBam()
             tStartBam = proc.time()[3]
@@ -106,11 +109,11 @@ sam_to_bam = function(filenames, fileFilteredSuffix='.filtered.sam', fileBamSuff
             asBam(fileFilteredFull, destination = fileBamFull)
             tElapsedBam = proc.time()[3] - tStartBam
             # Announce you're done
-            writeLines(paste('...done (', round(tElapsedBam/60, digits=2), 'm).', sep=''))
+            writeLines(paste("...done (", round(tElapsedBam/60, digits=2), "m).", sep=""))
             flush.console()
-        }
+        } else { writeLines("Not converting to bam, sorting, and generating index file.") }
     
-        writeLines('Done with file. Don\'t be concerned by any warning messages concerning merging files; asBam() does that and it\'s fine.')
+        writeLines("Done with file. Don\'t be concerned by any warning messages concerning merging files; asBam() does that and it\'s fine.")
     
     }
 

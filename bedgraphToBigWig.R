@@ -9,7 +9,7 @@
 # > bedgraphToBigWig(filenames, ucscPath="/opt/UCSCtools/", genomeSizeFile="/path/to/genomeSizeFile.txt")
 #
 # TIME:
-# On yasuimac: ~1m per file.
+# ~40s - 1m per bedgraph, where the bedgraphs are generally ~400-800 MB.
 #
 #
 ########################################################
@@ -33,10 +33,11 @@ bedgraphToBigWig = function(filenames, ucscPath, genomeSizeFile, bwDest="./") {
     
     for (f in filenames) {
         
-        writeLines(paste("\nProcessing file:", f))
-        
+        writeLines("\n")
         # Make sure file exists, but let's not be picky about the extension as bedgraphs might not have .bedgraph
-        if ( ! file_checks(f) ) { next }
+        if ( ! file_checks(f, verbose=TRUE) ) { next }
+        
+        writeLines(paste("\nProcessing file:", f))
         
         # Define arguments to the genomeCoverageBed command
         fOut = paste(bwDest, sub(file_ext(f), "bigwig", f), sep="")
@@ -45,15 +46,14 @@ bedgraphToBigWig = function(filenames, ucscPath, genomeSizeFile, bwDest="./") {
         #################
         # Get output file
         #################
-        writeLines(paste("Creating file ", fOut, "...", sep=""), sep="")
-        if ( file_checks(fOut, shouldExist=FALSE) ) {
+        if ( file_checks(fOut, shouldExist=FALSE, verbose=TRUE) ) {
+            writeLines(paste("Creating file ", fOut, "...", sep=""), sep="")
             tStart = proc.time()[3]
             system2(paste(ucscPath, "bedgraphToBigWig", sep=""), args = arguments, stdout = fOut)
             tElapsed = proc.time()[3] - tStart
             writeLines(paste("done (", round(tElapsed/60, digits=2), "m).", sep=""))
+            writeLines("Done with file.")
         }
-        
-        writeLines("Done with file.")
         
     }
     

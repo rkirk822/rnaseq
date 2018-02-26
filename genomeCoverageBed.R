@@ -13,7 +13,7 @@
 #
 #
 # USAGE:
-# > genomeCoverageBed('samplename_mapped_Aligned.out.filtered.bed', bedtoolsPath='/opt/bedtools2/bin/', genomeSizeFile = '/path/to/genome_size.tab.txt')
+# > genomeCoverageBed('samplename_mapped_Aligned.out.filtered.bed', '/path/to/genome_size.tab.txt', bedtoolsPath='/opt/bedtools2/bin/')
 #
 # TIME:
 # On yasuimac: 2.5m for 600 MB bam file
@@ -42,12 +42,13 @@ genomeCoverageBed = function(filenames, genomeSizeFile, bedtoolsPath="", bedgrap
     
     for (f in filenames) {
         
-        writeLines(paste("\nProcessing file:", f))
-        
+        writeLines("\n")
         # Make sure file exists and has extension .bam or .bed
         # Note the 4 is because both of those are length 4
         inFormat = substr(f, (nchar(f)-4)+1, nchar(f))
-        if ( ! file_checks(f, extension = inFormat) ) { next }
+        if ( ! file_checks(f, extension = inFormat, verbose=TRUE) ) { next }
+        
+        writeLines(paste("Processing file:", f))
         
         # Define arguments to the genomeCoverageBed command
         arguments = c(f, "-g", genomeSizeFile, "-bg")
@@ -57,15 +58,14 @@ genomeCoverageBed = function(filenames, genomeSizeFile, bedtoolsPath="", bedgrap
         # Get output file
         #################
         fOut = paste(bedgraphDest, sub(inFormat, ".gencov.bedgraph", f), sep="")
-        writeLines(paste("Creating file ", fOut, "...", sep=""), sep="")
-        if ( file_checks(fOut, shouldExist=FALSE) ) {
+        if ( file_checks(fOut, shouldExist=FALSE, verbose=TRUE) ) {
+            writeLines(paste("Creating file ", fOut, "...", sep=""), sep="")
             tStart = proc.time()[3]
             system2(paste(bedtoolsPath, "genomeCoverageBed", sep=""), args = arguments, stdout = fOut)
             tElapsed = proc.time()[3] - tStart
             writeLines(paste("done (", round(tElapsed/60, digits=2), "m).", sep=""))
+            writeLines("Done with file.")
         }
-        
-        writeLines("Done with file.")
         
     }
 

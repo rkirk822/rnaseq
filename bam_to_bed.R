@@ -34,23 +34,24 @@ bam_to_bed = function(filenames, bedtoolsPath = "", bedDest = "./" ) {
     
     for (f in filenames) {
         
-        writeLines(paste("\nProcessing file:", f))
-    
+        writeLines("\n")
         # Make sure file exists and has extension .bam
-        if ( ! file_checks(f, extension = ".bam") ) { next }
+        if ( ! file_checks(f, extension = ".bam", verbose=TRUE) ) { next }
+        
+        writeLines(paste("Processing file:", f))
         
         #################
         # Get bed file
         #################
         fBed = paste(bedDest, sub(".bam", ".bed", f), sep="")
-        writeLines(paste("Creating file ", fBed, "...", sep=""), sep="")
-        if ( file_checks(fBed, shouldExist=FALSE) ) {
+        if ( file_checks(fBed, shouldExist=FALSE, verbose=TRUE) ) {
+            writeLines(paste("Creating file ", fBed, "...", sep=""), sep="")
             tStart = proc.time()[3]
             system2(paste(bedtoolsPath, "bamToBed", sep=""), args = c("-i", f), stdout = fBed)
             tElapsed = proc.time()[3] - tStart
             writeLines(paste("done (", round(tElapsed/60, digits=2), "m).", sep=""))
+            writeLines("Done with file.")
         }
-        writeLines("Done with file.")
 
     }
 

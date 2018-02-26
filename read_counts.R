@@ -7,12 +7,23 @@
 # USAGE:
 # sampleCounts = read_counts( list.files(pattern='cutadapt_report.txt' ) )
 # names(sampleCounts) = sapply( names(sampleCounts), function(x) {substr(x,1,2)} )
-# barplot(sampleCounts, las = 2)
+# # Getting samples in the order you want for a bar plot
+# sampleCountsSorted=sampleCounts[which(names(sampleCounts)=='cb')]
+# sampleCountsSorted=c(sampleCountsSorted, sampleCounts[which(names(sampleCounts)=='L4')])
+# sampleCountsSorted=c(sampleCountsSorted, sampleCounts[which(names(sampleCounts)=='L6')])
+# sampleCountsSorted=c(sampleCountsSorted, sampleCounts[which(names(sampleCounts)=='BF')])
+# sampleCountsSorted=c(sampleCountsSorted, sampleCounts[which(names(sampleCounts)=='PV')])
+# sampleCountsSorted=c(sampleCountsSorted, sampleCounts[which(names(sampleCounts)=='EM')])
+# sampleCountsSorted
+# # Bar plot
+# par(mar=c(3, 6, 2, 1))
+# barplot(sampleCountsSorted, las = 2)
 
 read_counts = function(filenames) {
 
-    source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
-
+    # source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
+    source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/file_checks.R")
+    
     countVec = vector()
     samplenames = filenames
     

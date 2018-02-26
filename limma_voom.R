@@ -64,11 +64,11 @@ cpmMin = 4
 # fn_efit = paste(respath, cellType, '_', stage, '_limma_efit.txt', sep='')
 # fn_ranks = paste(respath, cellType, '_', stage, '_limma_ranked_genes.csv', sep='')
 # fn_R = paste(respath, cellType,'_', stage, '_limma.Rdata', sep='')
-# day = 2
-respath = '/Users/nelsonlab/Documents/Toolboxes/limma_voom/RORb_results/testing/'
+day = 30
+respath = '/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/'
 fn_efit = paste(respath,'RORb_p',day,'_limma_efit.txt',sep='')
-# fn_ranks = paste(respath,'RORb_p',day,'_limma_ranked_genes.csv',sep='')
-fn_ranks = paste(respath,'RORb_all_limma_ranked_genes.csv',sep='')
+fn_ranks = paste(respath,'RORb_p',day,'_limma_ranked_genes.csv',sep='')
+# fn_ranks = paste(respath,'RORb_all_limma_ranked_genes.csv',sep='')
 fn_R = paste(respath,'RORb_p',day,'_limma.R',sep='')
 
 # # fileList - files containing sample counts to be included
@@ -79,7 +79,7 @@ fn_R = paste(respath,'RORb_p',day,'_limma.R',sep='')
 # if (any(fileList=='EMXTTXEarly_1_fcounts.txt')) {
 #     fileList = fileList[-which(fileList=='EMXTTXEarly_1_fcounts.txt')]
 # }
-setwd('/Users/nelsonlab/Documents/Toolboxes/limma_voom/counts_no_comment/')
+setwd('/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/counts_no_comment/')
 fileList = list.files(pattern=paste('p',day,'_',sep='')) # include the underscore to be safe
 
 # # Create the DGEList object (digital gene expression) dge_all
@@ -108,15 +108,15 @@ dge_all$samples$gentype = factor(sub('.*BF_RORb','',sub('p.*','',samplenames)), 
 gentype = dge_all$samples$gentype
 design = model.matrix(~gentype)
 
-################
-# # This is specific to making one large table for the RORb data
+# ################
+# # # This is specific to making one large table for the RORb data
 app=FALSE
 use_colnames=TRUE
-if (day>2) {
-    app=TRUE
-    use_colnames=FALSE
-}
-#################
+# if (day>2) {
+#     app=TRUE
+#     use_colnames=FALSE
+# }
+# #################
 
 ####################################################################
 ####################################################################
@@ -184,15 +184,15 @@ dn_idx = which(tvals_sorted<0)
 up_idx = which(tvals_sorted>0)
 new_idx = c(dn_idx, up_idx)
 # Put it all in a data frame
-# genes_by_rank = data.frame(direction_sorted[new_idx],  genes_sorted[new_idx], lfc_sorted[new_idx], rank[new_idx], pvals_sorted[new_idx])
-# colnames = c('Direction', 'Gene symbol', 'LFC', 'Rank', 'p-value')
+genes_by_rank = data.frame(direction_sorted[new_idx],  genes_sorted[new_idx], lfc_sorted[new_idx], rank[new_idx], pvals_sorted[new_idx])
+colnames = c('Direction', 'Gene symbol', 'LFC', 'Rank', 'p-value')
 # # # for doing one big table of RORb # # #
-genes_by_rank = data.frame(rep(paste('p',day,sep=''),times=length(genes)), direction_sorted[new_idx],  genes_sorted[new_idx], lfc_sorted[new_idx], rank[new_idx], pvals_sorted[new_idx])
-if (use_colnames) {
-    colnames = c('Age', 'Direction', 'Gene symbol', 'LFC', 'Rank', 'p-value')
-} else {
-    colnames = FALSE
-}
+# genes_by_rank = data.frame(rep(paste('p',day,sep=''),times=length(genes)), direction_sorted[new_idx],  genes_sorted[new_idx], lfc_sorted[new_idx], rank[new_idx], pvals_sorted[new_idx])
+# if (use_colnames) {
+#     colnames = c('Age', 'Direction', 'Gene symbol', 'LFC', 'Rank', 'p-value')
+# } else {
+#     colnames = FALSE
+# }
 # # # end for doing one big table of RORb # # #
 write.table(genes_by_rank, quote=FALSE, row.names=FALSE, col.names=colnames, append = app, file=fn_ranks, sep=',')
 print('Wrote ranked gene lists to file.')
@@ -202,82 +202,4 @@ save(file=fn_R, 'dge_all', 'dge', 'design', 'v', 'vfit', 'efit', 'dt', 'genes_by
 
 
 
-#########################################################################
-# # Stuff that will or might be used as I improve the script/pipeline
-#########################################################################
 
-# # Partway through ranking up-genes against each other and down-genes against each other
-# # Save ranked lists of genes.  When things access the 2nd col it's to get at KO, not intercept.
-# # Separate genes that go up in KO samples from those that go down.
-# direction = efit$t[,2]
-# # Sort each list in ascending order of p-value
-# dn_pvals = efit$p.value[which(direction<0),2])
-# dn_ranks = order(dn_pvals)
-# dn_pvals_sorted = dn_pvals(dn_ranks)
-# # Effect size
-# dn_lfc = efit$coefficients[dnidx,2]
-# dn_lfc_sorted = dn_lfc[dn_ranks]
-# # Gene symbols
-# dn_genes = rownames(efit$p.value[dnidx])
-# dn_genes_sorted = dn_genes[dn_ranks]
-
-
-
-# # I haven't looked much at what treat does.  It makes an extreme difference
-# # in that there are far fewer genes making the cutoff.  It doesn't include F-values.
-# # Let's go with normal LFC thresholding for now.
-# # Use treat method to impose minimum LFC
-# tfit=treat(vfit, lfc=1);
-# print('Used treat method to impose minimum LFC.')
-
-
-# # Look at the output
-# koUp=which(dt==-1)
-# koDn=which(dt==1)
-
-
-
-# Show me (or save) table of genes with zero counts in all samples.
-# Plots, possibly one function each:
-# Density of log cpm
-
-########################
-# Log cpm density plots
-########################
-# library(RColorBrewer)
-# nsamples=ncol(dge)
-# col=brewer.pal(nsamples,'Paired')
-# par(mfrow=c(1,2))
-# # Plot first sample.  Ylim will actually need to be higher, for the other samples.
-# plot( density(dge_lcpm[,1]), col=col[1], lwd=2, las=2, main='', xlab='', ylim=c(0,0.23))
-# title(main='Log CPM, all genes')
-# abline(v=0,lty=3)
-# # Plot rest of samples
-# for (i in 2:nsamples) {
-# 	den = density(dge_lcpm[,i])
-# 	lines(den$x, den$y, col=col[i], lwd=2)
-# 	}
-# #  Legend is huge, don't bother til you look up how to shrink it
-# legend('topright', samplenames, text.col=col, bty='n')
-
-# # In the other panel, plot density of log cpm for expressed genes only
-# dge_sub_cpm=cpm(dge_sub)
-# dge_sub_lcpm=cpm(dge_sub,log=TRUE)
-# plot( density(dge_sub_lcpm[,1]), col=col[1], lwd=2, las=2, main='', xlab='', ylim=c(0,0.25))
-# title(main='Log CPM, expressed genes')
-# abline(v=0,lty=3)
-# for (i in 2:nsamples) {
-# 	den = density(dge_sub_lcpm[,i])
-# 	lines(den$x, den$y, col=col[i], lwd=2)
-# 	}
-
-# ################################
-# # Sample distribution box plots
-# ################################
-# # One with and one without using the scaling factors
-# par(mfrow=c(1,2))
-# boxplot(dge_sub_lcpm, las=2, col=col, main="")
-# title(main="Log cpm, expressed genes, unnormalized",ylab='Log cpm')
-# dge_norm_lcpm=cpm(dge_norm,log=TRUE)
-# boxplot(dge_norm_lcpm, las=2, col=col, main="")
-# title(main="Log cpm, expressed genes, normalized",ylab='Log cpm')

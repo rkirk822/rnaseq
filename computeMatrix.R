@@ -40,28 +40,29 @@ computeMatrix = function(bigwigs, regionsFile, deeptoolsPath="", matDest="./", o
     # For each bigwig
     for (b in bigwigs) {
         
-        writeLines(paste("\nProcessing file:", b))
+        writeLines("\n")
         
         # Make sure file exists, but let's not be picky about the extension as bigwigs might not have .bigwig
-        if ( ! file_checks(b) ) { next }
+        if ( ! file_checks(b, verbose=TRUE) ) { next }
+        
+        writeLines(paste("Processing file:", b))
         
         # Define arguments to the computeMatrix command
         fOut = paste(matDest, sub(file_ext(b), paste(outSuffix, ".mat.gz", sep=""), b), sep="")
-        arguments = c("scale-regions", "-S", b, "-R", regionsFile, "-b", "1000", "-a", "1000", "--regionBodyLength", "1000", "--skipZeros", "-o", fOut, "-p", "2")
+        arguments = c("scale-regions", "-S", b, "-R", regionsFile, "-b", "1000", "-a", "1000", "--regionBodyLength", "1000", "--skipZeros", "-o", fOut, "-p", "8")
         
         #################
         # Get output file
         #################
-        writeLines(paste("Creating file ", fOut, "...", sep=""), sep="")
         errFile = sub(".gz", ".err.txt", fOut)
-        if ( file_checks(fOut, shouldExist=FALSE) ) {
+        if ( file_checks(fOut, shouldExist=FALSE, verbose=TRUE) ) {
+            writeLines(paste("Creating file ", fOut, "...", sep=""), sep="")
             tStart = proc.time()[3]
             system2(paste(deeptoolsPath, "computeMatrix", sep=""), args = arguments, stdout = fOut, stderr = errFile)
             tElapsed = proc.time()[3] - tStart
             writeLines(paste("done (", round(tElapsed/60, digits=2), "m).", sep=""))
+            writeLines(paste("Done with file.  See", errFile, "for messages displayed by computeMatrix."))
         }
-        
-        writeLines(paste("Done with file.  See", errFile, "for messages displayed by computeMatrix."))
         
     }
     

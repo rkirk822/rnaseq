@@ -1,7 +1,9 @@
 
 
 
-file_checks = function(filename, shouldExist=TRUE, extension=NA) {
+
+
+file_checks = function(filename, shouldExist=TRUE, extension=NA, verbose=FALSE) {
     
     # Given a filename and skip condition (either it already exists or it doesn't exist), say you're skipping if it meets the skip condition.
     # Optionally also give an extension and say you're skipping if it doesn't have that extension.
@@ -14,13 +16,13 @@ file_checks = function(filename, shouldExist=TRUE, extension=NA) {
     
     # If it should and doesn't
     if ( shouldExist & !doesExist ) {
-        writeLines(paste('File does not exist; skipping:', filename))
+        if (verbose) { writeLines(paste("File does not exist:", filename)) }
         checksOut = FALSE
     }
     
     # If it does and shouldn't
     if ( doesExist & !shouldExist ) {
-        writeLines(paste('File already exists; skipping:', filename))
+        if (verbose) { writeLines(paste("File already exists:", filename)) }
         checksOut = FALSE
     }
     
@@ -29,13 +31,13 @@ file_checks = function(filename, shouldExist=TRUE, extension=NA) {
     if ( checksOut ) {
         if ( ! is.na(extension) ) {
             # If so, make it start with a dot, for consistency
-            if (! substr(extension, 1, 1) == '.') {
+            if (! substr(extension, 1, 1) == ".") {
                 extension = paste('.', extension, sep='')
             }
             # Check that the last bit of the file name is .<extension>
             extLen = nchar(extension)
             if ( ! substr(filename, (nchar(filename)-extLen)+1, nchar(filename)) == extension) {
-                writeLines(paste('File doesn\'t have extension \'', extension, '\'; skipping: ', filename, sep=''))
+                if (verbose) { writeLines(paste("File doesn\'t have extension \'", extension, "\': ", filename, sep="")) }
                 checksOut = FALSE
             }
         

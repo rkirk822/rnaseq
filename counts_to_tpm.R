@@ -3,7 +3,13 @@
 # 
 # Given a gene (or whatever) by sample read count matrix and a length for each gene, return TPM matrix.
 # Follows http://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/
-
+#
+# To spell it out a bit more:
+# Gene length / 1000 gives you how many kilobases long the gene is.
+# Count / length-in-kilobases gives you reads per kilobase for that gene.
+# So you've normalized for gene length.
+# Now, get how many millions of reads there are in the sample.
+# And normalize by that.  Reads per kilobase, per million reads in the sample.
 
 counts_to_tpm = function(countMat, geneLengths) {
 
