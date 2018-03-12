@@ -1,10 +1,10 @@
 
 # UNFINISHED
-# Works, but need to clean it up and update the documentation.
+# Works, but need to clean it up.
 # Separate the stuff for selecting the genes from the stuff for making the plots.  I want one function that takes a gene 
 # list, identfies them in the given files, and makes these figures for them.
 
-# exprHeatmaps.R
+# First dealing with the fact that fewer genes end up in the heatmaps than have fold changes above the minimum according to topTable.
 
 # Given files with TPM/sample and p-values for differential expression across conditions, create and print to pdf expression 
 # heatmaps of the top-ranked genes by p-value. Each comparison has two expression heatmaps: one for the top-ranked genes 
@@ -19,16 +19,18 @@
 library(plotly)
 
 # # Define some variables
-projectPath =  '/Users/nelsonlab/Documents/Results_temporarily_here/Aging/'
+# projectPath =  '/Users/nelsonlab/Documents/Results_temporarily_here/Aging/'
+projectPath =  "/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/"
 # projectPath = '/Users/emmamyers/Documents/Work_temp/Aging/'
-treatment = 'p200'
+# treatment = 'p200'
+treatment = "KO"
 N = 100000      # Set to > genes than are in the file with limma pvals to not limit how many genes are in each heatmap
 ncolors = 5  # number of colors to have in palette
 ylabSize = 8 # font size for gene symbols
 figHeight = 2000
 figWidth = 300
 lfcMin = 1.5  # Make 0 to not filter by LFC
-alpha = 0.05 # Make 1 to not filter by p-value
+alpha = 0.01 # Make 1 to not filter by p-value
 
 getFileNames = function(path, comparison) {
   # comparison = paste(cellType, stage, sep = '_')
@@ -100,9 +102,9 @@ makeHeatmap = function(exprForPlot, xlabs, figHeight, figWidth, ylabSize, compar
 
 
 # This is the only code that should change for each comparison
-comparison = 'Aging'
-# comparison = 'p2'
-# comparison = 'EMX_Late'
+# comparison = "Aging"
+comparison = "Rorb_p2"
+# comparison = "EMX_Late"
 
 
 # Get TPMs and indexes in TPM matrix of top-ranking genes (up and down, separately)
@@ -120,8 +122,8 @@ exprForPlotUp = t(apply(exprForPlotUp_unscaled, 1, normFun))
 writeLines("Done.")
 
 # Get x-labels
-xlabs = sub("BF_RORbHT", "", colnames(tpms))
-# xlabs = sub("BF_RORb", "", colnames(tpms))
+# xlabs = sub("BF_RORbHT", "", colnames(tpms))
+xlabs = sub("BF_RORb", "", colnames(tpms))
 # xlabs = sub(cellType, '', sub(paste(stage, '_', sep=''), '', colnames(tpms)))
 
 # My makeHeatmap() function won't do the layout and colorbar stuff so there's some more hackery going on here
