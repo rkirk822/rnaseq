@@ -11,17 +11,20 @@
 # This stuff depends on the dataset:
 # Working directory, fileList, resFile
 ###############################################
-setwd("/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/counts_no_comment/")
+setwd("/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/RORb_stuff/counts_no_comment/")
 # setwd("/Volumes/DataStorage2/Emma/From_CodingClub1/RNAseq/TTX/counts/counts_m20_q20_no_comment/")
 # cellType = 'EMX'; stage = 'Early'
 # comparison = paste(cellType, stage, sep="")
 # fileList = list.files(pattern=cellType)
 # fileList = fileList[which(regexpr(stage, fileList)>0)]
 # comparison = "p2"
-comparison = "Rorb_aging"
+# comparison = "Rorb_aging"
+comparison = "Rorb"
 # note underscore prevents getting, e.g., "p200" included with "p2"
 # fileList = list.files(pattern=paste(comparison, "_", sep=""))
-fileList = c( list.files(pattern="HTp30"), list.files(pattern="HTp200") )
+# fileList = c( list.files(pattern="HTp30"), list.files(pattern="HTp200") )
+fileList = list.files(pattern="_fcounts.txt")
+fileList = fileList[ - which(regexpr('p200_', fileList) > 0 ) ]
 resFile = paste("/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/", comparison, "_TPM.csv", sep="")
 tpm = TRUE # If you want raw counts, set to FALSE
 #################################################

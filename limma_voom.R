@@ -1,86 +1,72 @@
 
 
 
+
 # limma_voom.R
+#
+# This really needs some cleaning up.
 #
 # Use limma-voom to rank genes by changed expression across two conditions,
 # using one as the reference in the linear models.  Save R objects to an Rdata file, write
 # some results from the linear modelling to a text file, and write a ranked gene list to a csv
 # file (ranked by BH-adjusted p-value).
-#
-# TIME:  Under a minute, for one RORb age (comparing 2 genotypes with 4 samples each).
-#
-# Important notes!!!!!!!!!!!!!!!!!!!
-#
-# 1) THIS SCRIPT DOES NOT CURRENTLY CHECK BEFORE SAVING RESULTS FILES.
-# IF YOU PICK A RESULTS FILE NAME FOR A FILE THAT ALREADY EXISTS, IT WILL BE OVERWRITTEN.
-#
-# 2) There are some hacks in here for getting the RORb gene ranks from all 3 ages into one big table.
-# I really should clean that up, but meanwhile:
-# FOR GETTING ALL RORB AGES IN ONE FILE
-# To have it loop through all ages and put ranked gene lists into one csv file:
-# - comment out the definition of the variable "day",
-# - uncomment the "if (day>2)" statement,
-# - make the filename for the ranked lists file be appropriate,
-# - down where genes_by_rank and colnames are defined, chose the ones that include "day" as first column,
-# - and do this:
-# > days=c(2,7,30)
-# > for (day in days) { source('/path/to/script/dex_script.R') }
-#
-# 3) In the fcounts output files, the commented-out line at the top has to be deleted,
-# and the headers left in.  Here's a few lines of R code for removing the comment:
-# setwd('/path/to/featureCounts/output/')
-# fileList=list.files()
-# # remove files likely to be in that directory that we don't want
-# fileList=fileList[which(regexpr('summary',fileList)<0)]
-# fileList=fileList[which(regexpr('display',fileList)<0)]
-# fileList=fileList[which(regexpr('pdf',fileList)<0)]
-# for (f in fileList) {
-#     t = read.table(f)
-#     write.table(t, paste('/destination/of/fixed/files/',f,sep=''),quote=FALSE, row.names=FALSE,col.names=FALSE,sep='\t')
-# }
-#
+
+# # Creagted dge with just the P2 samples and did: 
+# design = model.matrix(~0+group)
+# contr.matrix=makeContrasts(HTvsKO = groupHT-groupKO, levels=colnames(design))
+# v = voom(dge_norm, design)                                 
+# vfit = lmFit(v, design)                                              
+# vfit = contrasts.fit(vfit, contrasts=contr.matrix)
+# efit = eBayes(vfit)
+# # Anton's suggestions: 
+# You have defined 0 as the intercept (which is fine when you don't need or don't want to have a control group). 
+# Then you defined your contrasts as HT - KO 
+#   (i.e. genes that are WT>KO will be positive and genes that are KO>WT will be negative; 
+#   this is OK if you keep this in mind, though I find it a bit counter-intuitive).
+# If I had WT and KO samples, I would define WT as intercept and then look at the KO coefficients, 
+#   but this is just my personal preference and either way is fine. 
+#   That way you will be testing if genes are up- or downregulated in KO compared to WT, not vice versa.
+
+# Now this is enough if just look at the genotype effect. 
+# If you want to look at the effect of the developmental stage, 
+#   I would define them as an additional variable in your model 
+#   (you would have to decide if the variable should be discrete or continuous; 
+#   I would go for discrete in your case). 
+# So you can define the design matrix like this:
+#   design = model.matrix(~gentype+stage)
+# Where genotype is a factor with levels WT and KO (with WT as reference level), 
+#   and stage would be a factor with levels P2, P7, P30 (e.g. with P2=youngest age as reference level).
+
+
 
 # # Loading edgeR also loads limma.
 library('edgeR')
 
+# respath = '/Users/nelsonlab/Documents/Results_temporarily_here/TTX_results/'
+# respath = '/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/'
+# respath = "/Users/emmamyers/Documents/Work_temp/"
+respath = "/Users/nelsonlab/Documents/Results_temporarily_here/Aging/"
+
+# fn_ranks = paste(respath, 'TTX_pvals_all_data.csv', sep='')
+# fn_ranks = paste(respath, 'Rorb_pvals_test_age.csv', sep='')
+# fn_R = paste(respath, "Rorb_pvals_test_age.Rdata", sep="")
+fn_ranks = paste(respath, "Aging_limma_ranked_genes.csv", sep="")
+fn_R = paste(respath, "Aging_limma_ranked_genes.Rdata", sep="")
+
 ########################################################################
-# This part you have to really look at and make sure it's what you want.
-# Define lfcMin, fn_efit, fn_ranks, fn_R.
-# Define dge_all, and put in gene and sample metadata.
-# Define the design matrix "design".
+# Create the DGEList object and get some metadata in there
 #########################################################################
 
-# Minimum log fold change to be considered for differential expression
-lfcMin = 1
-# Minimum total CPM a gene needs, across all samples, to be expressed "somewhere"
-cpmMin = 4
+# setwd('/Users/nelsonlab/Documents/Results_temporarily_here/TTX_results/counts_m20_q20_no_comment/')
+# setwd("/Users/emmamyers/Documents/Work_temp/counts_no_comment_with_fakes/")
+setwd("/Users/nelsonlab/Documents/Results_temporarily_here/Aging/counts_no_comment/")
 
 
-# # Results filenames:  fn_efit, fn_ranks, fn_R
-# # Make sure the results file names correctly represents the files going into the DGE object
-# cellType = 'PV'; stage = 'Early'
-# respath = '/Users/nelsonlab/Documents/Toolboxes/limma_voom/TTX_results/'
-# fn_efit = paste(respath, cellType, '_', stage, '_limma_efit.txt', sep='')
-# fn_ranks = paste(respath, cellType, '_', stage, '_limma_ranked_genes.csv', sep='')
-# fn_R = paste(respath, cellType,'_', stage, '_limma.Rdata', sep='')
-day = 30
-respath = '/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/'
-fn_efit = paste(respath,'RORb_p',day,'_limma_efit.txt',sep='')
-fn_ranks = paste(respath,'RORb_p',day,'_limma_ranked_genes.csv',sep='')
-# fn_ranks = paste(respath,'RORb_all_limma_ranked_genes.csv',sep='')
-fn_R = paste(respath,'RORb_p',day,'_limma.R',sep='')
-
-# # fileList - files containing sample counts to be included
-# setwd('/Volumes/CodingClub1/RNAseq/TTX/counts_m20_q20_no_comment/')
-# setwd('/Volumes/DataStorage2/Emma/From_CodingClub1/RNAseq/TTX/counts/counts_m20_q20_no_comment/')
-# fileList = list.files(pattern=cellType)
-# fileList = fileList[which(regexpr(stage, fileList)>0)]
-# if (any(fileList=='EMXTTXEarly_1_fcounts.txt')) {
-#     fileList = fileList[-which(fileList=='EMXTTXEarly_1_fcounts.txt')]
-# }
-setwd('/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/counts_no_comment/')
-fileList = list.files(pattern=paste('p',day,'_',sep='')) # include the underscore to be safe
+fileList = list.files(pattern="_fcounts.txt")
+# fileList = list.files(pattern="HT")
+# fileList = fileList[ - which(regexpr('p2_', fileList) > 0 ) ]
+# fileList = fileList[ - which(regexpr('p7_', fileList) > 0 ) ]
+# fileList = fileList[ - which(regexpr('p200_', fileList) > 0 ) ]
 
 # # Create the DGEList object (digital gene expression) dge_all
 # # "all" is for all genes; we're going to subset later and have "dge"
@@ -95,39 +81,46 @@ dge_all$genes = as.data.frame(rownames(dge_all))
 samplenames = gsub('_fcounts.txt','',fileList)
 colnames(dge_all) = samplenames
 
-# # Get information about samples into the samples dataframe
-dge_all$samples$age = as.factor(as.numeric(sub('_.*','',sub('.*p','',fileList))))
-
 # # For the thing you're comparing based on, set the control/reference level by making it the first thing in levels=c('grp1','grp2')
+dge_all$samples$age = factor( sub('_.*','',sub('.*HT','',fileList)), levels = c("p30", "p200") )
 # dge_all$samples$group = factor(substr(samplenames, nchar(cellType)+1, nchar(cellType)+3), levels = c('Ctl','TTX'))
-dge_all$samples$gentype = factor(sub('.*BF_RORb','',sub('p.*','',samplenames)), levels = c('HT','KO'))
+# dge_all$samples$gentype = factor(sub('.*BF_RORb','',sub('p.*','',samplenames)), levels = c('HT','KO'))
+# dge_all$samples$age = factor( sub('_.*','',substr(fileList, 10, nchar(fileList))), levels = c("p2", "p7", "p30", "p200") )
 
-# # Create design matrix
-# group = dge_all$samples$group
-# design = model.matrix(~group)
-gentype = dge_all$samples$gentype
-design = model.matrix(~gentype)
+# # Get any other information about samples into the samples dataframe
+# cellType=rep('EMX',times=length(fileList)); cellType[ which( substr(fileList, 1, 2) == "PV" ) ] = "PV"
+# dge_all$samples$cellType = cellType
+# stage=rep('Early',times=length(fileList)); stage[ which( regexpr('Late', fileList) > 0 ) ] = 'Late'
+# dge_all$samples$stage = stage
+# dge_all$samples$age = as.factor(as.numeric(sub('_.*','',sub('.*p','',fileList))))
 
-# ################
-# # # This is specific to making one large table for the RORb data
-app=FALSE
-use_colnames=TRUE
-# if (day>2) {
-#     app=TRUE
-#     use_colnames=FALSE
-# }
-# #################
 
 ####################################################################
+# Couple more things to do with the DGEList object:
+# Restrict to expressed genes
+# Calculate normalization factors
 ####################################################################
 
-# Restrict to genes with at least X cpm in at least Y samples total.
-dge_cpm = cpm(dge_all)
-keep.genes = rowSums(dge_cpm>1)>=cpmMin
-dge = dge_all[keep.genes,,keep.lib.sizes=FALSE]
+# Get row indexes of genes you're going to keep
+# Get TPM and get gene symbols out of first column and into row names
+tpmMin = 10
+# countsTable = read.csv('/Users/emmamyers/Documents/Work_temp/Rorb_aging_new_TPM.csv')
+countsTable = read.csv("/Users/nelsonlab/Documents/Results_temporarily_here/Aging/Aging_TPM.csv")
+rownames(countsTable) = countsTable[,1]
+countsTable = countsTable[,-1]
+# Get gene means for each group of samples.
+group1 = countsTable[, which(regexpr('p30_', colnames(countsTable)) > 0)]
+group2 = countsTable[, which(regexpr('p200_', colnames(countsTable)) > 0)]
+# group3 = countsTable[, which(regexpr('p2_', colnames(countsTable)) > 0)]
+# group4 = countsTable[, which(regexpr('p7_', colnames(countsTable)) > 0)]
+# orvec = rowMeans(group1)>tpmMin | rowMeans(group2)>tpmMin | rowMeans(group3)>tpmMin | rowMeans(group4)>tpmMin
+keepLogical = cbind( rowMeans(group1) > tpmMin,  rowMeans(group2) > tpmMin )
+orvec = keepLogical[,1] | keepLogical[,2]
+keepIdx = which(orvec)
+# Now you have the row indexes of genes to keep; keep them in dge
+dge = dge_all[keepIdx,,keep.lib.sizes=FALSE]
 print('Restricted to expressed genes.')
-# # Want to have it print this to screen, and the actual numbers.
-# dim(dge)[1]/dim(dge_all)[1]
+
 
 # Calculate normalization factors.  That's now part of the DGEList object.
 dge = calcNormFactors(dge, method='TMM')
@@ -135,71 +128,113 @@ print('Calculated normalization factors.')
 # # Probably want to have a look at these too.
 # dge_norm$samples
 
-# Deal with heteroscedascity in the count data
-# Get "precision weights"
-v = voom(dge, design)
+####################################################################
+# Create the design and contrast matrices
+####################################################################
+
+# Where genotype is a factor with levels WT and KO (with WT as reference level), 
+#   and stage would be a factor with levels P2, P7, P30 (e.g. with P2=youngest age as reference level).
+
+# # Design matrix
+comparison = dge$samples$age
+# var1 = dge$sample$age
+design = model.matrix(~comparison)  # Control as intercept ("keeping" intercept)
+# design = model.matrix(~comparison+var1)  # Control as intercept ("keeping" intercept)
+# design = model.matrix(~0+comparison)  # 0 as intercept ("dropping" intercept)
+colnames(design) = gsub('comparison', '', colnames(design))
+colnames(design) = gsub('var1', '', colnames(design))
+# gentype = dge_all$samples$gentype
+# design = model.matrix(~gentype)
+
+# # Contrast matrix
+# # If you left in the intercept, remember your ref condition is called "(Intercept)".
+# contrastMat = makeContrasts( HTvsKO = KO - HT, levels=colnames(design) )
+# contrastMat = makeContrasts( p30p200 = p200 - p30, levels = colnames(design) )
+# contrastMat = makeContrasts(
+#     PVEarly = PVTTXEarly - PVCtlEarly,
+#     PVLate = PVTTXLate - PVCtlLate,
+#     EMXEarly = EMXTTXEarly - EMXCtlEarly,
+#     EMXLate = EMXTTXLate - EMXCtlLate,
+#     levels = colnames(design))
+
+
+#####################################################################################
+# Get precision weights, linear models, variability estimates,
+# coefficients for contrasts in contrast matrix, and adjusted p-values
+#####################################################################################
+
+# Get "precision weights" to deal with heteroscedascity in the count data
+voomOutput = voom(dge, design)
 print('Got weights.')
+
 # Fit a linear model to each gene
-vfit = lmFit(v, design)
+vfit = lmFit(voomOutput, design)
 print('Fitted linear model to each gene.')
-# Get better gene-wise variability estimates
+
+# # Ccoefficients for contrasts
+# vfit = contrasts.fit(vfit, contrasts=contrastMat)
+# print('Calculated coefficients for desired contrasts.')
+
+# Better gene-wise variability estimates
 efit = eBayes(vfit)
 print('Estimated gene-wise variability.')
 
-# Summary of numbers of differentially expressed genes
-dt=decideTests(efit, lfc=lfcMin)
-summary(dt)
+# FDR-adjusted p-values in summary table
+summaryTable = topTable(efit, n=Inf, sort.by='none')
 
-# Write results to a file
-write.fit(efit, dt, file=fn_efit)
-print('Wrote efit to file.')
-
-# Get FDR-adjusted p-values
-tt = topTable(efit, n=Inf, sort.by='none')
-
-# Save ranked list of genes
-pval_ranks = order(tt$adj.P.Val) # second column for non-reference group, not intercept
-pvals_sorted = tt$adj.P.Val[pval_ranks]
-lfc_sorted=efit$coefficients[pval_ranks,2] # effect size
-# Include gene names
-genes = rownames(tt)
-genes_sorted = genes[pval_ranks]
-# Include a column ("Direction") indicating whether expr went up or down in non-reference group
-direction = efit$t[,2]
-# (little song and dance to figure out what the non-reference group was called)
-comparisonNameLen = nchar(names(attr(design, 'contrasts')))
-comparisonNameAndNonRefName = dimnames(design)[[2]][[2]]
-nonRefName = substr(comparisonNameAndNonRefName, comparisonNameLen+1, nchar(comparisonNameAndNonRefName))
-# Okay, NOW include the freakin column
-direction[which(direction>0)] = paste('up', nonRefName, sep='')
-direction[which(direction<0)] = paste('dn', nonRefName, sep='')
-direction_sorted = direction[pval_ranks]
-# # Make sure this is true
-# all(direction=='up'|| direction=='dn')
-# They're going to be in order of rank and I want that in there
-rank = 1:dim(dge)[1]
-# Pull out down versus up
-tvals_sorted = efit$t[pval_ranks,2]
-dn_idx = which(tvals_sorted<0)
-up_idx = which(tvals_sorted>0)
-new_idx = c(dn_idx, up_idx)
-# Put it all in a data frame
-genes_by_rank = data.frame(direction_sorted[new_idx],  genes_sorted[new_idx], lfc_sorted[new_idx], rank[new_idx], pvals_sorted[new_idx])
-colnames = c('Direction', 'Gene symbol', 'LFC', 'Rank', 'p-value')
-# # # for doing one big table of RORb # # #
-# genes_by_rank = data.frame(rep(paste('p',day,sep=''),times=length(genes)), direction_sorted[new_idx],  genes_sorted[new_idx], lfc_sorted[new_idx], rank[new_idx], pvals_sorted[new_idx])
-# if (use_colnames) {
-#     colnames = c('Age', 'Direction', 'Gene symbol', 'LFC', 'Rank', 'p-value')
-# } else {
-#     colnames = FALSE
-# }
-# # # end for doing one big table of RORb # # #
-write.table(genes_by_rank, quote=FALSE, row.names=FALSE, col.names=colnames, append = app, file=fn_ranks, sep=',')
-print('Wrote ranked gene lists to file.')
-
+####################################################################
 # Save stuff to an R object
-save(file=fn_R, 'dge_all', 'dge', 'design', 'v', 'vfit', 'efit', 'dt', 'genes_by_rank', 'pval_ranks', 'lfcMin')
+####################################################################
+
+# save(file=fn_R, "dge_all", "dge", "design", "contrastMat", 
+#      "voomOutput", "vfit", "efit", "summaryTable")
+
+# Trying without contrast matrix first
+save(file=fn_R, "dge_all", "dge", "design", 
+     "voomOutput", "vfit", "efit", "summaryTable")
 
 
+
+###################################################################################
+# Write to csv the following stuff in the following format, for one comparison: 
+# File is names <comparison>_limma_ranked_genes.csv
+# Columns names and content, in this order:
+# Direction: "dn<non-reference condition>" or "up<non-reference condition>"
+# Gene symbol
+# LFC - This is the limma-adjusted one, based on its model
+# Rank - By p-value
+# p-value
+# 
+# Also, sort so that the genes going down in the non-reference condition are 
+# first, followed by those that go up.  Within those group, they're sorted by rank.
+####################################################################################
+
+idx = 2 # THIS IS WHAT WON'T WORK WHEN EXCLUDING INTERCEPT
+nonRefName = "p200"  # GOTTA FIGURE THIS OUT TOO
+
+# Get ranks; sort the gene symbols, LFCs, and p-values accordingly
+pval_rank = order(summaryTable$adj.P.Val)
+gene = rownames(summaryTable)[pval_rank]
+lfc = efit$coefficients[pval_rank, idx]
+pval = summaryTable$adj.P.Val[pval_rank]
+
+# Get values for "Direction" column
+dn_idx = which(lfc<0)
+up_idx = which(lfc>0)
+direction = lfc
+direction[up_idx] = paste('up', nonRefName, sep='')
+direction[dn_idx] = paste('dn', nonRefName, sep='')
+
+# Going to separate down-regulated from up-regulated genes
+new_idx = c(dn_idx, up_idx)
+
+# Put it all in a data frame
+# I STILL WANT TO TRIPLE-CHECK IF PVAL_RANK[NEW_IDX] IS CORRECT
+genes_by_rank = data.frame(direction[new_idx],  gene[new_idx], lfc[new_idx], pval_rank[new_idx], pval[new_idx])
+colnames = c('Direction', 'Gene symbol', 'LFC', 'Rank', 'p-value')
+
+# Write the table
+write.table(genes_by_rank, quote=FALSE, row.names=FALSE, col.names=colnames, file=fn_ranks, sep=',')
+print('Wrote ranked gene lists to file.')
 
 

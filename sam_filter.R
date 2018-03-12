@@ -33,8 +33,8 @@ source('/Volumes/CodingClub1/RNAseq/code/file_checks.R')
 
 sam_filter = function(fileIn, fileOut, verbose=FALSE, deleteTemps=TRUE) {
     
-    # If fileOut already exists, don't do anything (file_checks() prints message)
-    if (!file_checks(fileOut, shouldExist = FALSE) ) {
+    # If fileOut already exists, don't do anything
+    if (!file_checks(fileOut, shouldExist = FALSE, verbose=TRUE) ) {
         return()
     }
     

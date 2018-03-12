@@ -30,7 +30,7 @@ read_counts = function(filenames) {
     for (f in filenames) {
     
         # Make sure file exists
-        if ( ! file_checks(f)) { samplenames = samplenames[-which(samplenames==f)]; next }
+        if ( ! file_checks(f, verbose=TRUE)) { samplenames = samplenames[-which(samplenames==f)]; next }
         lines = readLines(con = f)
         # identify the line with the information we want
         lineWithCount = lines[which(regexpr("Total reads processed:", lines)>0)]

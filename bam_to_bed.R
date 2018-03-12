@@ -2,6 +2,8 @@
 
 # bam_to_bed.R
 #
+# CHANGE THIS TO bamToBed.R TO MATCH THING IT'S CALLING, LIKE THE OTHERS
+#
 # Take bam file and get bed file.
 # Mitochondrial, unknown, and "random" reads should have been removed already (see sam_filter.R).
 #
@@ -22,7 +24,7 @@
 # $ /opt/bedtools2/bin/bamToBed -i samplename_mapped_Aligned.out.bam > samplename.bed
 
 
-bam_to_bed = function(filenames, bedtoolsPath = "", bedDest = "./" ) {
+bam_to_bed = function(filenames, bedtoolsPath = "", bedDest = "./", outSuffix="" ) {
 
     # Won't be necessary when this is in package
     source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
@@ -43,11 +45,11 @@ bam_to_bed = function(filenames, bedtoolsPath = "", bedDest = "./" ) {
         #################
         # Get bed file
         #################
-        fBed = paste(bedDest, sub(".bam", ".bed", f), sep="")
+        fBed = paste(bedDest, sub(".bam", paste(".", outSuffix, ".bed", sep=""), f), sep="")
         if ( file_checks(fBed, shouldExist=FALSE, verbose=TRUE) ) {
             writeLines(paste("Creating file ", fBed, "...", sep=""), sep="")
             tStart = proc.time()[3]
-            system2(paste(bedtoolsPath, "bamToBed", sep=""), args = c("-i", f), stdout = fBed)
+            system2(paste(bedtoolsPath, "bamToBed", sep=""), args = c("-i", f, "-split"), stdout = fBed)
             tElapsed = proc.time()[3] - tStart
             writeLines(paste("done (", round(tElapsed/60, digits=2), "m).", sep=""))
             writeLines("Done with file.")

@@ -1,29 +1,37 @@
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE)
-```
+# UNFINISHED
+# Works, but need to clean it up and update the documentation.
+# Separate the stuff for selecting the genes from the stuff for making the plots.  I want one function that takes a gene 
+# list, identfies them in the given files, and makes these figures for them.
 
-## Expression heatmaps
+# exprHeatmaps.R
 
-#### Each comparison (PV Early, PV Late, TTX Early, TTX Late) has two heatmaps: one for the top-ranked genes that decrease in the TTX condition, and one for those that increase.  Genes are ordered by p-value (increasing).  P-values are based on limma-voom.
-#### Expression values are log2(TPM).
-#### Color scales are not equal across plots.
-#### Formatted similarly to Fig. 3 in Okaty et al 2009, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2749660/#R70.
-
-```{r, echo=FALSE}
+# Given files with TPM/sample and p-values for differential expression across conditions, create and print to pdf expression 
+# heatmaps of the top-ranked genes by p-value. Each comparison has two expression heatmaps: one for the top-ranked genes 
+# that decrease in the treatment condition, and one for those that increase.  Genes are ordered by effect size (i.e. log fold
+# change), decreasing.  Each comparison also gets a one-column heatmap of effect size for each of the top genes, and another 
+# one of their mean expression across all samples for the comparison.
+# P-values are based on limma-voom.
+# Expression values are log2(TPM).
+# Color scales are not equal across plots.
+# Formatted similarly to Fig. 3 in Okaty et al 2009, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2749660/#R70.
 
 library(plotly)
 
-# Define some variables
-projectPath =  '/Users/nelsonlab/Documents/Results_temporarily_here/TTX_results/'
-N = 100      # number of genes in each heatmap
+# # Define some variables
+projectPath =  '/Users/nelsonlab/Documents/Results_temporarily_here/Aging/'
+# projectPath = '/Users/emmamyers/Documents/Work_temp/Aging/'
+treatment = 'p200'
+N = 100000      # Set to > genes than are in the file with limma pvals to not limit how many genes are in each heatmap
 ncolors = 5  # number of colors to have in palette
 ylabSize = 8 # font size for gene symbols
 figHeight = 2000
 figWidth = 300
+lfcMin = 1.5  # Make 0 to not filter by LFC
+alpha = 0.05 # Make 1 to not filter by p-value
 
-getFileNames = function(path, cellType, stage) {
-  comparison = paste(cellType, stage, sep = '_')
+getFileNames = function(path, comparison) {
+  # comparison = paste(cellType, stage, sep = '_')
   fileTPM = paste(projectPath, comparison, '_TPM.csv', sep = '')
   fileLimma = paste(projectPath, comparison, '_limma_ranked_genes.csv', sep = '')
   filenames = list(fileTPM=fileTPM, fileLimma=fileLimma)
@@ -38,19 +46,26 @@ getExprMat = function(filename) {
   return(exprMat)
   }
 
-getTopIdx = function(exprMat, filename, n) {
+getTopIdx = function(exprMat, filename, n, lfcMin, treatment) {
   # Inputs:  Expression matrix, file with pvals from limma, number of genes
-  # Outputs: Data frame with indexes (in expr matrix) of the 100 top-ranked genes down-regulated with TTX; same for up-regulated, and the effect size (log fold change) for each.  All ordered by effect size.
+  # Outputs: Data frame with indexes (in expr matrix) of the 100 top-ranked genes down-regulated in treated samples; same for up-regulated, and the effect size (log fold change) for each.  All ordered by effect size.
   df = read.csv(filename)
-  dfDn = df[which(df$Direction == 'dnTTX'),]
-  dfUp = df[which(df$Direction == 'upTTX'),]
-  dfDnTop = dfDn[1:n,]
-  dfUpTop = dfUp[1:n,]
+  dfDn = df[which(df$Direction == paste("dn", treatment, sep="")),]
+  dfUp = df[which(df$Direction == paste("up", treatment, sep="")),]
+  dfDnTop = dfDn[1:min(n, dim(dfDn)[1]),]
+  dfUpTop = dfUp[1:min(n, dim(dfUp)[1]),]
   lfcRanksDn = order(abs(dfDnTop$LFC), decreasing=TRUE)
   lfcRanksUp = order(abs(dfUpTop$LFC), decreasing=TRUE)
   dfDnTopSorted = dfDnTop[lfcRanksDn,]
   dfUpTopSorted = dfUpTop[lfcRanksUp,]
-  topIdx = data.frame(dnIdx = match(dfDnTopSorted$Gene.symbol, rownames(exprMat)),
+  # Impose minimum LFC
+  dfDnTopSorted = dfDnTopSorted[which(abs(dfDnTopSorted$LFC) >= lfcMin),]
+  dfUpTopSorted = dfUpTopSorted[which(abs(dfUpTopSorted$LFC) >= lfcMin),]
+  # Limit to significantly DEX genes
+  dfDnTopSorted = dfDnTopSorted[which(abs(dfDnTopSorted$p.value) < alpha),]
+  dfUpTopSorted = dfUpTopSorted[which(abs(dfUpTopSorted$p.value) < alpha),]
+  # Find this limma_ranked_genes files stuff in the expression matrix; those are the indexes to output
+  topIdx = list(dnIdx = match(dfDnTopSorted$Gene.symbol, rownames(exprMat)),
                       upIdx = match(dfUpTopSorted$Gene.symbol, rownames(exprMat)),
                       dnLFC = dfDnTopSorted$LFC, upLFC = dfUpTopSorted$LFC)
   return(topIdx)
@@ -68,7 +83,7 @@ prepExprMat = function(exprMat, idx) {
   return(exprMatL2Rev)
 }
 
-makeHeatmap = function(exprForPlot, xlabs, figHeight, figWidth, ylabSize, cellType, stage, direction) {
+makeHeatmap = function(exprForPlot, xlabs, figHeight, figWidth, ylabSize, comparison, direction) {
   # Figure out if minimum value is negative, since that affects how we want to set the lower limit of the color scale
   minFactor = 0.95; if (min(exprForPlot) < 0) {minFactor = 1.05}
   minVal = min(exprForPlot)*minFactor
@@ -76,51 +91,55 @@ makeHeatmap = function(exprForPlot, xlabs, figHeight, figWidth, ylabSize, cellTy
   p = plot_ly(z = exprForPlot, x = xlabs, y = rownames(exprForPlot), type='heatmap', colors = colorRamp(c('yellow', 'red')), zmin = minVal, zmax = max(exprForPlot*minFactor), height=figHeight, width = figWidth)
   # p = layout(p, yaxis = list(tickfont = list(size = ylabSize), ticklen = 0), 
   #      xaxis = list(ticklen = 0), 
-  #      title = paste(cellType, stage, ',', direction))
+  #      title = paste(comparison, ',', direction))
   # # lenmode and len aren't actually affecting the color bar height
   # colorbar(p, limits = c(minVal, max(exprForPlot*minFactor)), lenmode = 'fraction',  len = 0.25, thickness = 30)
   return(p)
 }
 
-```
 
-
-```{r, echo=FALSE}
 
 # This is the only code that should change for each comparison
-cellType = 'EMX'
-stage = 'Late'
+comparison = 'Aging'
+# comparison = 'p2'
+# comparison = 'EMX_Late'
 
 
 # Get TPMs and indexes in TPM matrix of top-ranking genes (up and down, separately)
-filenames = getFileNames(projectPath, cellType, stage)
+filenames = getFileNames(projectPath, comparison)
 tpms = getExprMat(filenames$fileTPM)
-topIdx = getTopIdx(tpms, filenames$fileLimma, N)
+topIdx = getTopIdx(tpms, filenames$fileLimma, N, lfcMin, treatment)
 
 # Get values to display for up- and down-regulated genes
 # Normalize within-gene to 0-to-1 range
+writeLines("Getting expression matrices...", sep="")
 exprForPlotDn_unscaled = prepExprMat(tpms, topIdx$dnIdx)
 exprForPlotUp_unscaled = prepExprMat(tpms, topIdx$upIdx)
 exprForPlotDn = t(apply(exprForPlotDn_unscaled, 1, normFun))
 exprForPlotUp = t(apply(exprForPlotUp_unscaled, 1, normFun))
+writeLines("Done.")
 
 # Get x-labels
-xlabs = colnames(tpms)
-xlabs = sub(cellType, '', sub(paste(stage, '_', sep=''), '', colnames(tpms)))
+xlabs = sub("BF_RORbHT", "", colnames(tpms))
+# xlabs = sub("BF_RORb", "", colnames(tpms))
+# xlabs = sub(cellType, '', sub(paste(stage, '_', sep=''), '', colnames(tpms)))
 
 # My makeHeatmap() function won't do the layout and colorbar stuff so there's some more hackery going on here
 
 # Heatmap for down-regulated genes
-pDn = makeHeatmap(exprForPlotDn, xlabs, figHeight, figWidth, ylabSize, cellType, stage, 'down-regulated with TTX')
+writeLines("Defining expression heatmap for down-regulated genes...", sep="")
+pDn = makeHeatmap(exprForPlotDn, xlabs, figHeight, figWidth, ylabSize, comparison, paste('down-regulated in', treatment, 'samples'))
 minFactor = 0.95; if (min(exprForPlotDn) < 0) {minFactor = 1.05}
 minVal = min(exprForPlotDn)*minFactor
 layout(pDn, yaxis = list(tickfont = list(size = ylabSize), ticklen = 0), 
        xaxis = list(ticklen = 0), 
-       title = paste(cellType, stage, ',', 'down-regulated with TTX'))
+       title = paste('down-regulated in', treatment, 'samples'))
 # lenmode and len aren't actually affecting the color bar height
 # colorbar(pDn, limits = c(minVal, max(exprForPlotDn*minFactor)), lenmode = 'fraction',  len = 0.25, thickness = 30)
+writeLines("Done.")
 
-# LFC - Heatmap is reversing colorscale, while colorbar is correct??
+# LFC
+writeLines("Defining LFC heatmap for down-regulated genes...", sep="")
 c = character(2); c[1] = '.'; c[2] = '.'
 pLfcDn = plot_ly(z = cbind(rev(abs(topIdx$dnLFC)), rev(abs(topIdx$dnLFC))), type = 'heatmap', 
         x = rep('.', times=2), y = rownames(exprForPlotDn),
@@ -129,10 +148,11 @@ pLfcDn = plot_ly(z = cbind(rev(abs(topIdx$dnLFC)), rev(abs(topIdx$dnLFC))), type
 layout(pLfcDn, 
        yaxis = list(tickfont = list(size = ylabSize), ticklen = 0), 
        xaxis = list(ticklen = 0), 
-       title = 'LFC, down with TTX')
-
+       title = paste('LFC, down in', treatment, 'samples'))
+writeLines("Done.")
 
 # Mean log2(TPM)
+writeLines("Defining mean expression heatmap for down-regulated genes...", sep="")
 c = character(2); c[1] = '.'; c[2] = '.'
 meanColRamp = c('turquoise1', 'magenta')
 # meanColRamp = c('skyblue', 'magenta')
@@ -144,24 +164,26 @@ pMeanDn = plot_ly(z = cbind(rowMeans(exprForPlotDn_unscaled), rowMeans(exprForPl
 layout(pMeanDn, 
        yaxis = list(tickfont = list(size = ylabSize), ticklen = 0), 
        xaxis = list(ticklen = 0), 
-       title = 'Mean log(TPM), down with TTX')
-
+       title = paste('Mean log(TPM), down in', treatment, 'samples'))
+writeLines("Done.")
 
 ############################################################
 # Heatmap for up-regulated genes
 ############################################################
 
-pUp = makeHeatmap(exprForPlotUp, xlabs, figHeight, figWidth, ylabSize, cellType, stage, 'up-regulated with TTX')
+writeLines("Defining expression heatmap for up-regulated genes...", sep="")
+pUp = makeHeatmap(exprForPlotUp, xlabs, figHeight, figWidth, ylabSize, comparison, paste('up-regulated in', treatment, 'samples'))
 minFactor = 0.95; if (min(exprForPlotUp) < 0) {minFactor = 1.05}
 minVal = min(exprForPlotUp)*minFactor
 layout(pUp, yaxis = list(tickfont = list(size = ylabSize), ticklen = 0), 
        xaxis = list(ticklen = 0), 
-       title = paste(cellType, stage, ',', 'up-regulated with TTX'))
+       title = paste('down-regulated in', treatment, 'samples'))
 # lenmode and len aren't actually affecting the color bar height
 # colorbar(pUp, limits = c(minVal, max(exprForPlotUp*minFactor)), lenmode = 'fraction',  len = 0.25, thickness = 30)
+writeLines("Done.")
 
-# LFC - Heatmap is reversing colorscale, while colorbar is correct??
-# Doing it once to get the correct heatmap and once to get the correct colorbar b/c I don't have time for this shit, plotly.
+# LFC
+writeLines("Defining LFC heatmap for up-regulated genes...", sep="")
 c = character(2); c[1] = '.'; c[2] = '.'
 pLfcUp = plot_ly(z = cbind(rev(abs(topIdx$upLFC)), rev(abs(topIdx$upLFC))), type = 'heatmap', 
         x = rep('.', times=2), y = rownames(exprForPlotUp),
@@ -170,9 +192,11 @@ pLfcUp = plot_ly(z = cbind(rev(abs(topIdx$upLFC)), rev(abs(topIdx$upLFC))), type
 layout(pLfcUp, 
        yaxis = list(tickfont = list(size = ylabSize), ticklen = 0), 
        xaxis = list(ticklen = 0), 
-       title = 'LFC, up with TTX')
+       title = paste('LFC, up in', treatment, 'samples'))
+writeLines("Done.")
 
 # Mean log2(TPM)
+writeLines("Defining mean expression heatmap for up-regulated genes...", sep="")
 c = character(2); c[1] = '.'; c[2] = '.'
 # meanColFun = colorRampPalette(c('turquoise1', 'magenta'))
 # meanCols = meanColFun(N)
@@ -186,21 +210,24 @@ pMeanUp = plot_ly(z = cbind(rowMeans(exprForPlotUp_unscaled), rowMeans(exprForPl
 layout(pMeanUp, 
        yaxis = list(tickfont = list(size = ylabSize), ticklen = 0), 
        xaxis = list(ticklen = 0), 
-       title = 'Mean log(TPM), up with TTX')
+       title = paste('Mean log(TPM), up in', treatment, 'samples'))
+writeLines("Done.")
 
 
 
-
+# stop("Not creating pdfs")
 
 # # Doesn't include the stuff that was in layout and colorbar commands; doing that stuff in Illustrator
+writeLines("Exporting pdfs for down-regulated genes...", sep="")
+export(p=pDn, file=paste(projectPath, comparison, '_dn.pdf', sep = ''))
+export(p=pLfcDn, file=paste(projectPath, comparison, '_dn_lfc.pdf', sep = ''))
+export(p=pMeanDn, file=paste(projectPath, comparison, '_dn_mean.pdf', sep = ''))
+writeLines("Done.")
 
-export(p=pDn, file=paste('/Users/nelsonlab/Documents/', cellType, '_', stage, '_dn.pdf', sep = ''))
-export(p=pLfcDn, file=paste('/Users/nelsonlab/Documents/', cellType, '_', stage, '_dn_lfc.pdf', sep = ''))
-export(p=pMeanDn, file=paste('/Users/nelsonlab/Documents/', cellType, '_', stage, '_dn_mean.pdf', sep = ''))
+writeLines("Exporting pdfs for up-regulated genes...", sep="")
+export(p=pUp, file=paste(projectPath, comparison, '_up.pdf', sep = ''))
+export(p=pLfcUp, file=paste(projectPath, comparison, '_up_lfc.pdf', sep = ''))
+export(p=pMeanUp, file=paste(projectPath, comparison, '_up_mean.pdf', sep = ''))
+writeLines("Done.")
 
-export(p=pUp, file=paste('/Users/nelsonlab/Documents/', cellType, '_', stage, '_up.pdf', sep = ''))
-export(p=pLfcUp, file=paste('/Users/nelsonlab/Documents/', cellType, '_', stage, '_up_lfc.pdf', sep = ''))
-export(p=pMeanUp, file=paste('/Users/nelsonlab/Documents/', cellType, '_', stage, '_up_mean.pdf', sep = ''))
-
-```
 

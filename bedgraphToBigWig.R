@@ -18,7 +18,7 @@
 # $ system2('/opt/UCSC/wigToBigWig', args=c('samplename.gencov.bedgraph', '/path/to/genomeSizeFile.txt', samplename.bigwig))
 
 
-bedgraphToBigWig = function(filenames, ucscPath, genomeSizeFile, bwDest="./") {
+bedgraphToBigWig = function(filenames, ucscPath, genomeSizeFile, bwDest="./", outSuffix="") {
 
     # Won't be necessary when this is in package
     source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
@@ -40,7 +40,7 @@ bedgraphToBigWig = function(filenames, ucscPath, genomeSizeFile, bwDest="./") {
         writeLines(paste("\nProcessing file:", f))
         
         # Define arguments to the genomeCoverageBed command
-        fOut = paste(bwDest, sub(file_ext(f), "bigwig", f), sep="")
+        fOut = paste(bwDest, sub(file_ext(f), paste(".", outSuffix, ".bigwig", sep=""), f), sep="")
         arguments = c(f, genomeSizeFile, fOut)
         
         #################
