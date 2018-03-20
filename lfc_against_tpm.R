@@ -22,8 +22,8 @@ mSize = 5
 #########################
 # Data stuff
 #########################
-projectPath =  "/Users/nelsonlab/Documents/Results_temporarily_here/Aging/"
-comparison = "Aging"
+projectPath =  "/Users/nelsonlab/Documents/Results_temporarily_here/TTX_results/"
+comparison = "EMXEarly"
 # Read file with TPM.
 tpm = read.csv(paste(projectPath, comparison, "_TPM.csv", sep=""))
 rownames(tpm) = tpm[,1]; tpm = tpm[,-1]  # Move the gene symbols into row names

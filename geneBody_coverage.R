@@ -7,7 +7,8 @@
 #
 # USAGE:
 # > bamfiles = list.files(pattern = '.bam')
-# > geneBody_coverage(bamfiles, regionsFile='/path/to/bedfile/All_mm10_wholeGenes.bed', outPrefixMarker='_mapped', dispMessages=TRUE)
+# > bamfiles = bamfiles[which(regexpr('.bai', bamfiles) < 0)]
+# > geneBody_coverage(bamfiles, regionsFile='/path/to/bedfile/All_mm10_wholeGenes.bed', outPrefixMarker='_mapped', dispMessages=FALSE)
 #
 # TIME:
 #

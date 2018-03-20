@@ -16,7 +16,7 @@
 #
 # Mitochondrial, unknown, and "random" reads should have been removed already (see sam_filter.R).
 #
-# If you do "norm", samtools has to be installed.
+# If you do "norm", samtools has to be installed, and you have to give it a BAM file, not a bed file.
 #
 #
 # USAGE:
@@ -41,6 +41,7 @@
 genomeCoverageBed = function(filenames, genomeSizeFile, bedtoolsPath="", bedgraphDest="./", outSuffix="", norm=FALSE, samtoolsPath="") {
 
     # Won't be necessary when this is in package
+    library(tools)
     source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
     source("/Volumes/CodingClub1/RNAseq/code/dir_check.R")
     source("/Volumes/CodingClub1/RNAseq/code/alignment_counts.R")

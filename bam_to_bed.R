@@ -6,7 +6,8 @@
 #
 # Take bam file and get bed file.
 # Mitochondrial, unknown, and "random" reads should have been removed already (see sam_filter.R).
-#
+# If you give the output file a suffix with "outSuffix", you need to start it with a "_" or "." or
+# whatever if you don't want it just smooshed onto the end of the input file name.
 #
 # USAGE:
 # > samplenames = read.csv('samplenames.txt', comment.char='#')
@@ -45,7 +46,7 @@ bam_to_bed = function(filenames, bedtoolsPath = "", bedDest = "./", outSuffix=""
         #################
         # Get bed file
         #################
-        fBed = paste(bedDest, sub(".bam", paste(".", outSuffix, ".bed", sep=""), f), sep="")
+        fBed = paste(bedDest, sub(".bam", paste(outSuffix, ".bed", sep=""), f), sep="")
         if ( file_checks(fBed, shouldExist=FALSE, verbose=TRUE) ) {
             writeLines(paste("Creating file ", fBed, "...", sep=""), sep="")
             tStart = proc.time()[3]
