@@ -24,21 +24,22 @@ library(plotly)
 
 # # Define some variables
 # projectPath =  '/Users/nelsonlab/Documents/Results_temporarily_here/Aging/'
-# projectPath =  "/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/"
-dataPath =  "/Users/nelsonlab/Documents/Results_temporarily_here/TTX_results/"
-resPath = "/Users/nelsonlab/Documents/Results_temporarily_here/TTX_results/"
+dataPath =  "/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/tpm_and_limma/"
+resPath =  "/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/"
+# dataPath =  "/Users/nelsonlab/Documents/Results_temporarily_here/TTX_results/"
+# resPath = "/Users/nelsonlab/Documents/Results_temporarily_here/TTX_results/"
 # projectPath = "/Users/emmamyers/Documents/Work_temp/"
 # treatment = 'p200'
-# treatment = "KO"
-treatment = "TTX"
-N = 100      # Set to > genes than are in the file with limma pvals to not limit how many genes are in each heatmap
+treatment = "KO"
+# treatment = "TTX"
+N = 100000      # Set to > genes than are in the file with limma pvals to not limit how many genes are in each heatmap
 ncolors = 5  # number of colors to have in palette
 ylabSize = 8 # font size for gene symbols
 figHeightPerGene = 20
 figWidth = 300
-lfcMin = 0  # Make 0 to not filter by LFC; I've been doing 1.5
-alpha = 1 # Make 1 to not filter by p-value; I've been doing 0.01
-scaleGenes = FALSE # If true, will standardize values within-gene to range from 0 to 1
+lfcMin = 1.5  # Make 0 to not filter by LFC; I've been doing 1.5
+alpha = 0.01 # Make 1 to not filter by p-value; I've been doing 0.01
+scaleGenes = TRUE # If true, will standardize values within-gene to range from 0 to 1
 
 getFileNames = function(path, comparison) {
   fileTPM = paste(path, comparison, "_TPM.csv", sep = '')
@@ -127,8 +128,8 @@ makeHeatmap = function(exprForPlot, xlabs, figHeightPerGene, figWidth, ylabSize,
 
 # This is the only code that should change for each comparison
 # comparison = "Aging"
-# comparison = "Rorb_p30"
-comparison = "PVLate"
+comparison = "Rorb_p30"
+# comparison = "PVLate"
 
 
 # Get TPMs and indexes in TPM matrix of top-ranking genes (up and down, separately)
@@ -172,7 +173,7 @@ con = file(geneFn)
 writeLines(c(dnSyms, upSyms), con, sep=",\n")
 close(con)
 writeLines("done.")
-
+stop("stopping point")
 # Get x-labels
 # xlabs = sub("BF_RORbHT", "", colnames(tpms))
 # xlabs = sub("BF_RORb", "", colnames(tpms))

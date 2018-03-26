@@ -4,6 +4,10 @@
 # Make it time calculating scaling factors too.
 # And give total time for each file and for all files.
 # But it's working, as is.
+#
+# If the input filename has a path attached to it, strip that off
+# before using the input filename to create the output filename.
+
 
 # genomeCoverageBed.R
 #
@@ -42,9 +46,12 @@ genomeCoverageBed = function(filenames, genomeSizeFile, bedtoolsPath="", bedgrap
 
     # Won't be necessary when this is in package
     library(tools)
-    source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
-    source("/Volumes/CodingClub1/RNAseq/code/dir_check.R")
-    source("/Volumes/CodingClub1/RNAseq/code/alignment_counts.R")
+    # source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
+    # source("/Volumes/CodingClub1/RNAseq/code/dir_check.R")
+    # source("/Volumes/CodingClub1/RNAseq/code/alignment_counts.R")
+    source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/file_checks.R")
+    source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/dir_check.R")
+    source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/alignment_counts.R")
 
     # Check arguments
     if (! bedtoolsPath == "") { bedtoolsPath = dir_check(bedtoolsPath) }
@@ -66,6 +73,7 @@ genomeCoverageBed = function(filenames, genomeSizeFile, bedtoolsPath="", bedgrap
         if ( file_checks(fOut, shouldExist=FALSE, verbose=TRUE) ) {
             
             # If we're normalizing coverage values, calculate scaling factor
+            scalingFactor = 1
             if (norm) {
                 writeLines("Calculating scaling factor for normalization...", sep="")
                 readCount = alignment_counts(f, samtoolsPath)

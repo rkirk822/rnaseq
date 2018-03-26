@@ -1,8 +1,4 @@
 
-# BUG:  The "pval_rank" column in the csv files has the wrong values.
-# Things are in the right order, though.
-#
-# Also this really needs some cleaning up.
 
 # limma_voom.R
 #
@@ -13,6 +9,26 @@
 #
 # If you didn't use a contrast matrix, go down to the end where the csv file gets written
 # and adjust accordingly.
+#
+# TIME:  Under a minute, for one RORb age (comparing 2 genotypes with 4 samples each).
+#
+#
+# NOTE ON FEATURECOUNTS OUTPUT THAT THIS SCRIPT READ IN TO A DGELIST OBJECT: 
+#
+# In the featureCounts output files, there's a commented-out line at the top.  For this
+# script to work, that line has to be deleted, and the headers left in.  Here's a few lines
+# of R code for removing the comment:
+# setwd('/path/to/featureCounts/output/')
+# fileList=list.files()
+# # these regexpr lines remove from the list types of files that are likely to be in the
+# # directory with featureCounts output, and that we don't want:
+# fileList=fileList[which(regexpr('summary',fileList)<0)]
+# fileList=fileList[which(regexpr('display',fileList)<0)]
+# fileList=fileList[which(regexpr('pdf',fileList)<0)]
+# for (f in fileList) {
+#     t = read.table(f)
+#     write.table(t, paste('/destination/of/fixed/files/',f,sep=''),quote=FALSE, row.names=FALSE,col.names=FALSE,sep='\t')
+# }
 
 
 
@@ -21,30 +37,30 @@
 library("edgeR")
 source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/file_checks.R")
 
-respath = "/Users/nelsonlab/Documents/Results_temporarily_here/TTX_results/"
-# respath = "/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/"
+# respath = "/Users/nelsonlab/Documents/Results_temporarily_here/TTX_results/"
+respath = "/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/"
 # respath = "/Users/emmamyers/Documents/Work_temp/"
 # respath = "/Users/nelsonlab/Documents/Results_temporarily_here/Aging/"
 
 
-fn_R = paste(respath, "TTX_limma_ranked_genes.Rdata", sep="")
-# fn_R = paste(respath, "Rorb_test_limma_ranked_genes.Rdata", sep="")
+# fn_R = paste(respath, "TTX_limma_ranked_genes.Rdata", sep="")
+fn_R = paste(respath, "Rorb_limma_ranked_genes.Rdata", sep="")
 # fn_R = paste(respath, "Aging_limma_ranked_genes.Rdata", sep="")
 
 ########################################################################
 # Create the DGEList object and get some metadata in there
 #########################################################################
 
-setwd("/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/TTX_stuff/counts_m20_q20_no_comment/")
+# setwd("/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/TTX_stuff/counts_m20_q20_no_comment/")
 # setwd("/Users/emmamyers/Documents/Work_temp/counts_no_comment_with_fakes/")
 # setwd("/Users/nelsonlab/Documents/Results_temporarily_here/Aging/counts_no_comment/")
-# setwd("/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/counts_no_comment/")
+setwd("/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/counts_no_comment/")
 
 fileList = list.files(pattern="_fcounts.txt")
 # fileList = list.files(pattern="HT")
 # fileList = fileList[ - which(regexpr('p2_', fileList) > 0 ) ]
 # fileList = fileList[ - which(regexpr('p7_', fileList) > 0 ) ]
-# fileList = fileList[ - which(regexpr('p200_', fileList) > 0 ) ]
+fileList = fileList[ - which(regexpr('p200_', fileList) > 0 ) ]
 
 # # Create the DGEList object (digital gene expression) dge_all
 # # "all" is for all genes; we're going to subset later and have "dge"
@@ -63,20 +79,22 @@ colnames(dge_all) = samplenames
 # # For the thing you're comparing based on, set the control/reference level by making it the first thing in levels=c('grp1','grp2')
 
 # dge_all$samples$age = factor( sub('_.*','',sub('.*HT','',fileList)), levels = c("p30", "p200") )
-
-# dge_all$samples$gentype = factor(sub('.*BF_RORb','',sub('p.*','',samplenames)), levels = c('HT','KO'))
 # dge_all$samples$age = factor( sub('_.*','',substr(fileList, 10, nchar(fileList))), levels = c("p2", "p7", "p30", "p200") )
-# dge_all$samples$subgroup = factor( paste(dge_all$samples$gentype, dge_all$samples$age, sep=""),
-#     levels = c("HTp2", "KOp2", "HTp7", "KOp7", "HTp30", "KOp30") )
+# # this gets the ages as just numbers
 # dge_all$samples$age = as.factor(as.numeric(sub('_.*','',sub('.*p','',fileList))))
 
+dge_all$samples$gentype = factor(sub('.*BF_RORb','',sub('p.*','',samplenames)), levels = c('HT','KO'))
+dge_all$samples$age = factor( sub('_.*','',substr(fileList, 10, nchar(fileList))), levels = c("p2", "p7", "p30") )
+dge_all$samples$subgroup = factor( paste(dge_all$samples$gentype, dge_all$samples$age, sep=""),
+    levels = c("HTp2", "KOp2", "HTp7", "KOp7", "HTp30", "KOp30") )
 
-cellType=rep('EMX',times=length(fileList)); cellType[ which( substr(fileList, 1, 2) == "PV" ) ] = "PV"
-dge_all$samples$cellType = cellType
-stage=rep('Early',times=length(fileList)); stage[ which( regexpr('Late', fileList) > 0 ) ] = 'Late'
-dge_all$samples$stage = stage
-dge_all$samples$conditions = factor(substr(samplenames, nchar(cellType)+1, nchar(cellType)+3), levels = c('Ctl','TTX'))
-dge_all$samples$subgroup = factor(paste(dge_all$samples$cellType, dge_all$samples$conditions, dge_all$samples$stage, sep=""), levels = c("EMXCtlEarly", "EMXTTXEarly", "EMXCtlLate", "EMXTTXLate", "PVCtlEarly", "PVTTXEarly", "PVCtlLate", "PVTTXLate"))
+
+# cellType=rep('EMX',times=length(fileList)); cellType[ which( substr(fileList, 1, 2) == "PV" ) ] = "PV"
+# dge_all$samples$cellType = cellType
+# stage=rep('Early',times=length(fileList)); stage[ which( regexpr('Late', fileList) > 0 ) ] = 'Late'
+# dge_all$samples$stage = stage
+# dge_all$samples$conditions = factor(substr(samplenames, nchar(cellType)+1, nchar(cellType)+3), levels = c('Ctl','TTX'))
+# dge_all$samples$subgroup = factor(paste(dge_all$samples$cellType, dge_all$samples$conditions, dge_all$samples$stage, sep=""), levels = c("EMXCtlEarly", "EMXTTXEarly", "EMXCtlLate", "EMXTTXLate", "PVCtlEarly", "PVTTXEarly", "PVCtlLate", "PVTTXLate"))
 
 ####################################################################
 # Couple more things to do with the DGEList object:
@@ -88,31 +106,39 @@ dge_all$samples$subgroup = factor(paste(dge_all$samples$cellType, dge_all$sample
 # Get TPM and get gene symbols out of first column and into row names
 tpmMin = 20
 # countsTable = read.csv('/Users/emmamyers/Documents/Work_temp/Rorb_aging_new_TPM.csv')
-# countsTable = read.csv("/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/Rorb_TPM.csv")
-countsTable = read.csv("/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/TTX_stuff/tpm/TTX_project_TPM.csv")
+countsTable = read.csv("/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/tpm_and_limma/Rorb_TPM.csv")
+# countsTable = read.csv("/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/TTX_stuff/tpm/TTX_project_TPM.csv")
 rownames(countsTable) = countsTable[,1]
 countsTable = countsTable[,-1]
 
 # # Get gene means for each group of samples.
+group1 = countsTable[, which(regexpr("HTp2_", colnames(countsTable)) > 0)]
+group2 = countsTable[, which(regexpr("KOp2_", colnames(countsTable)) > 0)]
+group3 = countsTable[, which(regexpr("HTp7_", colnames(countsTable)) > 0)]
+group4 = countsTable[, which(regexpr("KOp7_", colnames(countsTable)) > 0)]
+group5 = countsTable[, which(regexpr("HTp30_", colnames(countsTable)) > 0)]
+group6 = countsTable[, which(regexpr("KOp30_", colnames(countsTable)) > 0)]
+
 # group1 = countsTable[, which(regexpr('p30_', colnames(countsTable)) > 0)]
 # # group2 = countsTable[, which(regexpr('p200_', colnames(countsTable)) > 0)]
 # group3 = countsTable[, which(regexpr('p2_', colnames(countsTable)) > 0)]
 # group4 = countsTable[, which(regexpr('p7_', colnames(countsTable)) > 0)]
 
-group1 = countsTable[, which(regexpr("EMXCtlEarly", colnames(countsTable)) > 0)]
-group2 = countsTable[, which(regexpr("EMXTTXEarly", colnames(countsTable)) > 0)]
-group3 = countsTable[, which(regexpr("EMXCtlLate", colnames(countsTable)) > 0)]
-group4 = countsTable[, which(regexpr("EMXTTXLate", colnames(countsTable)) > 0)]
-group5 = countsTable[, which(regexpr("PVCtlEarly", colnames(countsTable)) > 0)]
-group6 = countsTable[, which(regexpr("PVTTXEarly", colnames(countsTable)) > 0)]
-group7 = countsTable[, which(regexpr("PVCtlLate", colnames(countsTable)) > 0)]
-group8 = countsTable[, which(regexpr("PVTTXLate", colnames(countsTable)) > 0)]
+# group1 = countsTable[, which(regexpr("EMXCtlEarly", colnames(countsTable)) > 0)]
+# group2 = countsTable[, which(regexpr("EMXTTXEarly", colnames(countsTable)) > 0)]
+# group3 = countsTable[, which(regexpr("EMXCtlLate", colnames(countsTable)) > 0)]
+# group4 = countsTable[, which(regexpr("EMXTTXLate", colnames(countsTable)) > 0)]
+# group5 = countsTable[, which(regexpr("PVCtlEarly", colnames(countsTable)) > 0)]
+# group6 = countsTable[, which(regexpr("PVTTXEarly", colnames(countsTable)) > 0)]
+# group7 = countsTable[, which(regexpr("PVCtlLate", colnames(countsTable)) > 0)]
+# group8 = countsTable[, which(regexpr("PVTTXLate", colnames(countsTable)) > 0)]
 
 
 
 # # Get indexes of genes with at least one mean over the minimum.
 # orvec = rowMeans(group1)>tpmMin | rowMeans(group3)>tpmMin | rowMeans(group4)>tpmMin
-orvec = rowMeans(group1)>tpmMin | rowMeans(group2)>tpmMin | rowMeans(group3)>tpmMin | rowMeans(group4)>tpmMin | rowMeans(group5)>tpmMin | rowMeans(group6)>tpmMin | rowMeans(group7)>tpmMin | rowMeans(group8)>tpmMin
+# orvec = rowMeans(group1)>tpmMin | rowMeans(group2)>tpmMin | rowMeans(group3)>tpmMin | rowMeans(group4)>tpmMin | rowMeans(group5)>tpmMin | rowMeans(group6)>tpmMin | rowMeans(group7)>tpmMin | rowMeans(group8)>tpmMin
+orvec = rowMeans(group1)>tpmMin | rowMeans(group2)>tpmMin | rowMeans(group3)>tpmMin | rowMeans(group4)>tpmMin | rowMeans(group5)>tpmMin | rowMeans(group6)>tpmMin
 # keepLogical = cbind( rowMeans(group1) > tpmMin,  rowMeans(group2) > tpmMin )
 # orvec = keepLogical[,1] | keepLogical[,2]
 keepIdx = which(orvec)
@@ -149,21 +175,21 @@ colnames(design) = gsub("var1", "", colnames(design))
 # # Contrast matrix, nonRefName
 # # If you left in the intercept, remember your ref condition is called "(Intercept)".
 # contrastMat = makeContrasts( HTvsKO = KO - HT, levels=c("HT", "KO") )
-# contrastMat = makeContrasts(
-#     p2 = KOp2 - HTp2,
-#     p7 = KOp7 - HTp7,
-#     p30 = KOp30 - HTp30,
-#     levels = colnames(design))
-# nonRefName = "KO"  # For writing to csv file
+contrastMat = makeContrasts(
+    p2 = KOp2 - HTp2,
+    p7 = KOp7 - HTp7,
+    p30 = KOp30 - HTp30,
+    levels = colnames(design))
+nonRefName = "KO"  # For writing to csv file
 # contrastMat = makeContrasts( p30p200 = p200 - p30, levels = colnames(design) )
 # nonRefName = "p200"
-contrastMat = makeContrasts(
-    PVEarly = PVTTXEarly - PVCtlEarly,
-    PVLate = PVTTXLate - PVCtlLate,
-    EMXEarly = EMXTTXEarly - EMXCtlEarly,
-    EMXLate = EMXTTXLate - EMXCtlLate,
-    levels = colnames(design))
-nonRefName = "TTX"
+# contrastMat = makeContrasts(
+#     PVEarly = PVTTXEarly - PVCtlEarly,
+#    PVLate = PVTTXLate - PVCtlLate,
+#     EMXEarly = EMXTTXEarly - EMXCtlEarly,
+#     EMXLate = EMXTTXLate - EMXCtlLate,
+#     levels = colnames(design))
+# nonRefName = "TTX"
 
 
 #####################################################################################
