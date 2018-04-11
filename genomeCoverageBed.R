@@ -46,12 +46,12 @@ genomeCoverageBed = function(filenames, genomeSizeFile, bedtoolsPath="", bedgrap
 
     # Won't be necessary when this is in package
     library(tools)
-    # source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
-    # source("/Volumes/CodingClub1/RNAseq/code/dir_check.R")
-    # source("/Volumes/CodingClub1/RNAseq/code/alignment_counts.R")
-    source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/file_checks.R")
-    source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/dir_check.R")
-    source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/alignment_counts.R")
+    source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
+    source("/Volumes/CodingClub1/RNAseq/code/dir_check.R")
+    source("/Volumes/CodingClub1/RNAseq/code/alignment_counts.R")
+    # source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/file_checks.R")
+    # source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/dir_check.R")
+    # source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/alignment_counts.R")
 
     # Check arguments
     if (! bedtoolsPath == "") { bedtoolsPath = dir_check(bedtoolsPath) }

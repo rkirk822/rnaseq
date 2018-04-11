@@ -12,7 +12,8 @@
 # Non-overlapping ranges.  I make these files using write_reduced_ranges.R.
 
 
-source("/Users/nelsonlab/Documents/Toolboxes/code_in_progress/read_fcounts_summary.R")
+source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/read_fcounts_summary.R")
+source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/file_checks.R")
 # source('/Users/emmamyers/Documents/Work_temp/read_fcounts_summary.R')
 
 # # int = intronic; non = non-intronic; one annot includes only intronic regions and the other everything else
@@ -21,12 +22,12 @@ annotInt = "/Users/nelsonlab/Documents/Results_temporarily_here/NucSeq_results/m
 # pathNon = "/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/RORb_stuff/counts_m20_q20/"
 # pathInt = "/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/RORb_stuff/intronic_counts/"
 # dataname = "Rorb"
-pathInt = "/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/NucSeq_stuff/nucseq_counts/intronic_counts"
-pathNon = "/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/NucSeq_stuff/nucseq_counts/usual_counts/"
-dataname = "Nuc-seq"
-# pathInt = "/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/NucSeq_stuff/rnaseq_counts/intronic_counts"
-# pathNon = "/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/NucSeq_stuff/rnaseq_counts/usual_counts/"
-# dataname = "RNA-seq in same cell types as Nuc-seq"
+# pathInt = "/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/NucSeq_stuff/nucseq_counts/intronic_counts"
+# pathNon = "/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/NucSeq_stuff/nucseq_counts/usual_counts/"
+# dataname = "Nuc-seq"
+pathInt = "/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/NucSeq_stuff/rnaseq_counts/intronic_counts"
+pathNon = "/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/NucSeq_stuff/rnaseq_counts/usual_counts/"
+dataname = "RNA-seq in same cell types as Nuc-seq"
 
 
 rangesEx = read.table(annotNon)
@@ -51,12 +52,12 @@ summaryInt = read_fcounts_summary(filesInt, verbose=FALSE)
 names(summaryInt) = gsub("_intronic_fcounts.txt.summary", "", names(summaryInt))
 
 # NORMALIZE TO TOTAL INTRONIC / EXONIC LENGTH
-summaryInt = summaryInt / totalLenInt
-summaryNon = summaryNon / totalLenEx
+summaryIntNorm = summaryInt / totalLenInt
+summaryNonNorm = summaryNon / totalLenEx
 
 # Get percentage of intronic reads
-totals = summaryNon + summaryInt
-percInt = round( (summaryInt / totals) * 100)
+totals = summaryNonNorm + summaryIntNorm
+percInt = round( (summaryIntNorm / totals) * 100)
 percInt = percInt[ -which(is.nan(rowSums(percInt))) , ]
 
 # Plot - bars are samples; heights are percentages
@@ -65,10 +66,20 @@ percIntAssigned = as.vector(percInt[1,], mode="numeric")
 names(percIntAssigned) = names(percInt)
 barplot(percIntAssigned, main=paste("Intronic reads in dataset", dataname), las=2, ylim=c(0,100), ylab="Percentage")
 
-
-
-
-
+# Write to table, with columns:
+# Sample, non-intronic count, intronic count, intronic percentage
+tablename = paste(dataname, "_intron_counts.csv", sep="")
+if (file_checks(tablename, shouldExist=FALSE, verbose=TRUE)) {
+    writeLines(paste("Writing values to ", tablename, "...", sep=""))
+    # Information into data frame
+    countInfo = data.frame(names(totals), as.vector(summaryNon[1,], mode="numeric"), as.vector(summaryInt
+    [1,], mode="numeric"), as.vector(summaryNonNorm[1,], mode="numeric"), as.vector(summaryIntNorm[1,], mode="numeric"), as.vector(percIntAssigned, mode="numeric"))
+    # Set column names
+    colnames(countInfo)=c("Sample", "Non-intronic count", "Intronic count", "Normalized non-intronic", "Normalized intronic", "Percent intronic (based on normalized values)")
+    # Write to file
+    write.table(countInfo, row.names=FALSE, file=tablename, sep=",")
+    writeLines("done.")
+}
 
 
 

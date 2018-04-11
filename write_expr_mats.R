@@ -11,7 +11,7 @@
 # This stuff depends on the dataset:
 # Working directory, fileList, resFile
 ###############################################
-setwd("/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/RORb_stuff/counts_no_comment/")
+setwd("/Users/work/Documents/counts_nucseq/intronic_counts/")
 # setwd("/Volumes/DataStorage2/Emma/From_CodingClub1/RNAseq/TTX/counts/counts_m20_q20_no_comment/")
 # cellType = 'EMX'; stage = 'Early'
 # comparison = paste(cellType, stage, sep="")
@@ -19,13 +19,14 @@ setwd("/Users/nelsonlab/Documents/Smintheus_stuff_copied_here/RORb_stuff/counts_
 # fileList = fileList[which(regexpr(stage, fileList)>0)]
 # comparison = "p2"
 # comparison = "Rorb_aging"
-comparison = "Rorb"
+comparison = "NucSeq"
 # note underscore prevents getting, e.g., "p200" included with "p2"
 # fileList = list.files(pattern=paste(comparison, "_", sep=""))
 # fileList = c( list.files(pattern="HTp30"), list.files(pattern="HTp200") )
 fileList = list.files(pattern="_fcounts.txt")
-fileList = fileList[ - which(regexpr('p200_', fileList) > 0 ) ]
-resFile = paste("/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/", comparison, "_TPM.csv", sep="")
+fileList = fileList[ - which(regexpr('summary', fileList) > 0 ) ]
+resFile = paste("/Users/work/Documents/", comparison, "_TPM_intronic.csv", sep="")
+# resFile = paste("/Users/nelsonlab/Documents/Results_temporarily_here/RORb_results/", comparison, "_TPM.csv", sep="")
 tpm = TRUE # If you want raw counts, set to FALSE
 #################################################
 
@@ -34,11 +35,13 @@ if (file.exists(resFile)) {
     stop("Specified results file already exists.  I\'m not going to overwrite anything!  It\'s for your own good.")
 }
 
-# Functions we'll be calling - these lines will be unnecessary when I package this code
-source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/read_fcounts.R")
-source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/counts_to_tpm.R")
+# # Functions we'll be calling - these lines will be unnecessary when I package this code
+# source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/read_fcounts.R")
+# source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/counts_to_tpm.R")
 # source('/Volumes/CodingClub1/RNAseq/code/read_fcounts.R')
 # source('/Volumes/CodingClub1/RNAseq/code/counts_to_tpm.R')
+source("/Users/work/Documents/rna-seq/read_fcounts.R")
+source("/Users/work/Documents/rna-seq/counts_to_tpm.R")
 
 # Read in the read counts
 writeLines("Reading in counts. . .")
