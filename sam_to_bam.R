@@ -81,7 +81,7 @@ sam_to_bam = function(filenames, fileFilteredSuffix=".filtered.sam", fileBamSuff
             writeLines("Filtering...", sep="")
             flush.console()
             # Announce output file name
-            writeLines(paste("file will be saved as", fileFilteredFull), sep="")
+            writeLines(paste("file will be saved as ", fileFilteredFull), sep="")
             flush.console()
             # Call and time sam_filter()
             tStartFilter = proc.time()[3]
@@ -92,16 +92,19 @@ sam_to_bam = function(filenames, fileFilteredSuffix=".filtered.sam", fileBamSuff
             flush.console()
         } else { writeLines("Not filtering.") }
         
+        
         ###############################################################################
         # Convert to sam to bam, sort, and generate index file.  All donw with asBam().
         ###############################################################################
         # Define name of bam file and check that it doesn't already exist
+        # asBam tacks ".bam" onto the end, so our "full" filename doesn't actually include it
         fileBamFull = paste(fileBamDest, sub(fileFilteredSuffix, fileBamSuffix, fileFiltered), sep="")
-        if ( file_checks(fileBamFull, shouldExist=FALSE, verbose=TRUE) ) {
+        print(fileBamFull)
+        if ( file_checks(paste(fileBamFull, ".bam", sep=""), shouldExist=FALSE, verbose=TRUE) ) {
             writeLines("Converting to bam, sorting, and generating index file...", sep="")
             flush.console()
             # Announce output file names
-            flush.console(); writeLines(paste("file will be saved as", fileBamFull, ".bam", sep=""), sep="")
+            flush.console(); writeLines(paste("file will be saved as ", fileBamFull, sep=""), sep="")
             flush.console()
             # Call and time asBam()
             tStartBam = proc.time()[3]

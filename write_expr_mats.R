@@ -4,6 +4,11 @@
 # 
 # Point this script to a list of files, each containing read counts from featureCounts for one sample.  It will write a gene-by-sample matrix to a csv file. Either raw counts or TPM.
 #
+# Note that the featureCounts "Length" field (which is used to get TPM) appears to be the summed
+# lengths of all the transcripts in the annotation file that are tagged as being part of that gene.
+# So if you used a file with all exons, it's the gene's exonic length; for introns, it's the gene's
+# intronic length.
+#
 # When this toolbox is a package, turn this script into a function that takes a list of files and an optional tpm argument.  Include example of how to easily define file list in help text.
 
 
@@ -32,7 +37,7 @@ tpm = TRUE # If you want raw counts, set to FALSE
 
 # Check if results file already exists
 if (file.exists(resFile)) {
-    stop("Specified results file already exists.  I\'m not going to overwrite anything!  It\'s for your own good.")
+    stop("Specified results file already exists.")
 }
 
 # # Functions we'll be calling - these lines will be unnecessary when I package this code

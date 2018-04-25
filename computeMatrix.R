@@ -8,9 +8,12 @@
 #
 # I'm not yet building in flexibility with arguments to computeMatrix, but that should happen.
 #
-#
+# IMPROVE: You have to be in the directory with the input files right now.  At least 
+# if you're giving it a matDest and maybe if you're not, I dunno.
+# 
+# 
 # USAGE:
-# > computeMatrix("samplename.gencov.bigwig", regionsFile="All_mm10_wholeGenes.bed", outSuffix="genebody")
+# > computeMatrix("samplename.gencov.bigwig", regionsFiles=c("All_mm10_wholeGenes.bed", "Shuffled_RORht_mm10.bed"), outSuffix="genebody")
 #
 # TIME:
 # ~14m for a 90MB bigwig, to 5MB matrix.
@@ -25,17 +28,22 @@
 # $ computeMatrix scale-regions -S test.bw -R All_mm10_wholeGenes.bed -b 1000 -a 1000 --regionBodyLength 1000 --skipZeros -o test.mat.gz -p 2
 
 
-computeMatrix = function(bigwigs, regionsFile, deeptoolsPath="", matDest="./", outSuffix="") {
+computeMatrix = function(bigwigs, regionsFiles, deeptoolsPath="", matDest="./", outSuffix="", 
+                         skipZeros=FALSE, missingDataAsZero=FALSE) {
 
     # Won't be necessary when this is in package
-    source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
-    source("/Volumes/CodingClub1/RNAseq/code/dir_check.R")
+    # source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
+    # source("/Volumes/CodingClub1/RNAseq/code/dir_check.R")
+    # source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/file_checks.R")
+    # source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/dir_check.R")
+    source("/Users/work/Documents/rna-seq/file_checks.R")
+    source("/Users/work/Documents/rna-seq/dir_check.R")
     library(tools)
 
     # Check arguments
     if (! deeptoolsPath == "") {deeptoolsPath = dir_check(deeptoolsPath)}
     matDest = dir_check(matDest)
-    if ( ! file.exists(regionsFile) ) { stop("Specified regionsFile does not exist.") }
+    if ( ! all(file.exists(regionsFiles)) ) { stop("One or more of the specified regions files do not exist.") }
     
     # For each bigwig
     for (b in bigwigs) {
@@ -49,7 +57,11 @@ computeMatrix = function(bigwigs, regionsFile, deeptoolsPath="", matDest="./", o
         
         # Define arguments to the computeMatrix command
         fOut = paste(matDest, sub(file_ext(b), paste(outSuffix, ".mat.gz", sep=""), b), sep="")
-        arguments = c("scale-regions", "-S", b, "-R", regionsFile, "-b", "1000", "-a", "1000", "--regionBodyLength", "1000", "--skipZeros", "-o", fOut, "-p", "8")
+        arguments = c("scale-regions", "-S", b, "-R", paste(regionsFiles, collapse=" "), "-b", "1000", "-a", "1000", "--regionBodyLength", "1000", "-o", fOut, "-p", "8")
+        if (skipZeros) { arguments = c(arguments, "--skipZeros") }
+        if (missingDataAsZero) { arguments = c(arguments, "--missingDataAsZero") }
+        
+        writeLines( collapse(arguments, sep = " ") )
         
         #################
         # Get output file

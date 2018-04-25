@@ -6,6 +6,11 @@ read_fcounts = function(filenames, verbose = TRUE) {
 # Read output of featureCounts for specified samples into a single data frame, concatenating the
 # read counts into a matrix, and give the last field (containing the counts) a single name (it
 # has the name of the BAM file processed by featureCounts).
+#
+# The column names of the output's Count field are the full filenames, so you might want to do
+# something like:
+# > counts = read_fcounts(fileList)
+# > colnames(counts$Count) = gsub("_fcounts.txt", "", colnames(counts$Count))
 
     # Check for nonexistent files
     msgFiles = filenames[which(!file.exists(filenames))]
@@ -36,6 +41,8 @@ read_fcounts = function(filenames, verbose = TRUE) {
         fcounts$Count = cbind(fcounts$Count, nextCounts$Count)
     }
     
+    colnames(fcounts$Count) = filenames
+    rownames(fcounts$Count) = fcounts$Geneid
     return(fcounts)
     
 }

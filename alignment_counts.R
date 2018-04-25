@@ -16,8 +16,8 @@
 alignment_counts = function(filenames, samtoolsPath="", what="passedQC", verbose=FALSE) {
 
     # Won't be necessary when this is in package
-    source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/file_checks.R")
-    # source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
+    # source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/file_checks.R")
+    source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
 
     # What reads do we want to count
     if (what == "passedQC") {

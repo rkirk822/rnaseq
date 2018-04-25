@@ -1,13 +1,5 @@
 
 
-# UNFINISHED
-# Make it time calculating scaling factors too.
-# And give total time for each file and for all files.
-# But it's working, as is.
-#
-# If the input filename has a path attached to it, strip that off
-# before using the input filename to create the output filename.
-
 
 # genomeCoverageBed.R
 #
@@ -31,18 +23,25 @@
 #              4m for an 815 MB bam file
 #              Slightly shorter starting from bed file (2 and 3m).
 #
+# IMPROVE:
+# Make it time calculating scaling factors too.
+# And give total time for each file and for all files.
+# If the input filename has a path attached to it, strip that off
+# before using the input filename to create the output filename.
+#
+#
 ########################################################
 # Here are the equivalent commands at the command line:
 ########################################################
-# $ /opt/bedtools2/bin/genomeCoverageBed -g /path/to/genome_size.tab.txt -i samplename.bed -bg > samplename.gencov.bedgraph
+# $ /opt/bedtools2/bin/genomeCoverageBed -g /path/to/genome_size.tab.txt -i samplename.bed -bg -split > samplename.gencov.bedgraph
 # Or, for bam input:
-# $ /opt/bedtools2/bin/genomeCoverageBed -g /path/to/genome_size.tab.txt -ibam samplename_mapped_Aligned_out.bam -bg > samplename.gencov.bedgraph
+# $ /opt/bedtools2/bin/genomeCoverageBed -g /path/to/genome_size.tab.txt -ibam samplename_mapped_Aligned_out.bam -bg -split > samplename.gencov.bedgraph
 #
 # To normalize by reads per million:
 # $ uniqueReads=$(samtools view -F 0x904 -c samplename_mapped_Aligned_out.bam)
 # $ /opt/bedtools2/bin/genomeCoverageBed -g /path/to/genome_size.tab.txt -ibam samplename_mapped_Aligned_out.bam -bg -scale 1000000/uniqueReads > samplename.gencov.bedgraph
 
-genomeCoverageBed = function(filenames, genomeSizeFile, bedtoolsPath="", bedgraphDest="./", outSuffix="", norm=FALSE, samtoolsPath="") {
+genomeCoverageBed = function(filenames, genomeSizeFile, bedtoolsPath="", bedgraphDest="./", outSuffix="", norm=FALSE, samtoolsPath="", strand=NULL) {
 
     # Won't be necessary when this is in package
     library(tools)
@@ -84,6 +83,7 @@ genomeCoverageBed = function(filenames, genomeSizeFile, bedtoolsPath="", bedgrap
             
             # Define arguments to the genomeCoverageBed command
             arguments = c(f, "-g", genomeSizeFile, "-bg", "-scale", scalingFactor, "-split")
+            if ( !is.null(strand) ) { arguments = c(arguments, "-strand", strand) }
             if (file_ext(f) == "bam") { arguments = c("-ibam", arguments) } else { arguments = c("-i", arguments) }
             
             # Get output file

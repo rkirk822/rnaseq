@@ -25,7 +25,7 @@
 ###################################################
 # # Stuff to set
 pathRaw='/Volumes/CodingClub1/RNAseq/smallRNA/20180402_NXT/barcodes_new/Emma/raw/'
-pathTrimmed='/Volumes/CodingClub1/RNAseq/smallRNA/20180402_NXT/barcodes_new/Emma/trimmed_paired/'
+pathTrimmed='/Volumes/CodingClub1/RNAseq/smallRNA/20180402_NXT/barcodes_new/Emma/trimmed/'
 extension=.fastq.gz
 adapterNameR=TruSeq_Index_Rev
 adapterReverse=GTTCGTCTTCTGCCGTATGCTCTANNNNNNCACTGACCTCAAGTCTGCACACGAGAAGGCTAGA
@@ -40,17 +40,17 @@ cores=8 # number of available cores
 
 # Filenames must be these appended by _R1_001 or _R2_001 and extension
 # sampleNames='GTAGAG_S1 GTCCGC_S2'
-sampleNames='GTAGAG_S1 GTCCGC_S2 GTGAAA_S3 GTGGCC_S4 GTTTCG_S5 CGTACG_S6 GAGTGG_S7'
+sampleNames='GTAGAG_S1 GTCCGC_S2 GTTTCG_S5 CGTACG_S6 GAGTGG_S7 GGTAGC_S8'
 
-echo $sampleNames
 
 # Check that you have access to cutadapt
 # (see the user guide re adding this to PATH)
 cutadapt 2>/dev/null
 if [ "$?" -ne "0" ]; then PATH=$PATH:$HOME/.local/bin; fi
 
-echo Trimmed reads will be saved to directory $pathTrimmed
-echo Output files:
+printf '\nSamples:\n%s' "$sampleNames"
+printf '\n\nTrimmed reads will be saved to: %s\n\n' "$pathTrimmed"
+printf 'Output files:'
 
 for sn in $sampleNames;
 do

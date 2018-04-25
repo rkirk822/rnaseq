@@ -1,9 +1,9 @@
 
 
-# exprHeatmaps.R
+# exprMean.R
 #
 # Given a gene-by-sample dataframe with expression values, and (optionally) a list of the genes and
-# samples you want included, make an expression heatmap using plotly.
+# samples you want included, make a one-column heatmap of mean expression using plotly.
 #
 # Note that, probably because I'm not set up to do the paying thing, some stuff doesn't get
 # incorporated into the output png.
@@ -15,9 +15,8 @@
 # sampleList = c("HTp2_1", "HTp2_2", "KOp2_1", "KOp2_2")
 # exprHeatmap(exprData, genes=geneList, samples=sampleList, fileOut="expr.png")
 
-exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE, scaleGenes=TRUE,
-                ylabSize=8, figHeightPerGene=20, figWidth = 300, colorsPlot = colorRamp(c("yellow", "red")), ncolors=5,
-                plotTitle="Expression heatmap", minVal=NULL, maxVal=NULL, fileOut=NULL) {
+exprMean = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE,
+                ylabSize=8, figHeightPerGene=20, figWidth = 200, colorsPlot = colorRamp(rev(c("turquoise1", "magenta"))), ncolors=5, plotTitle=NULL, minVal=NULL, maxVal=NULL, fileOut=NULL) {
                     
     # Unnecessary once packaged
     library(plotly)
@@ -55,11 +54,7 @@ exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE, scaleGe
         # zeros where expression was zero
         exprForPlot[exprTemp == 0] = 0
     }
-    # Normalize within-gene to 0-to-1 range if requested
-    if (scaleGenes) {
-        normFun = function(v) {vnorm = (v-min(v)) / (max(v)-min(v)); return(vnorm)}
-        exprForPlot = t(apply(exprForPlot, 1, normFun))
-    }
+    
     # Vertically flip for heatmap
     exprForPlot = apply(exprForPlot, 2, rev)
 
@@ -80,16 +75,16 @@ exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE, scaleGe
 
     ### Making the plot #######################################################
     # Make plotly object
-    exprPlotlyObj = plot_ly(z = exprForPlot, x = colnames(exprForPlot), y = rownames(exprForPlot),
-                    type='heatmap', colors = colorsPlot,
-                    zmin = minVal, zmax = maxVal,
-                    height=figHeightThis, width = figWidth)
-
+    meanPlotlyObj = plot_ly(z = cbind(rowMeans(exprForPlot), rowMeans(exprForPlot)),
+        x = rep('.', times=2), y = rownames(exprSubset),
+        type='heatmap', colors = colorsPlot, height=figHeightThis, width = figWidth)
     # Set some layout stuff
-    exprPlotlyObj = layout(exprPlotlyObj,
-                    yaxis = list(tickfont = list(size = ylabSize, tickvals = 1:dim(exprForPlot)[2]), ticklen = 0),
-                    xaxis = list(ticklen = 0),
-                    title = plotTitle)
+    meanPlotlyObj = layout(meanPlotlyObj,
+                        yaxis = list(tickfont = list(size = ylabSize, ticklen = 0),
+                        xaxis = list(ticklen = 0),
+                        title = plotTitle))
+                        
+    print(exprForPlot)
     
 
     # Save if given fileOut name
@@ -99,12 +94,12 @@ exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE, scaleGe
         if ( !is.null(fileOut) ) {
             if ( file_checks(fileOutFull, shouldExist=FALSE, verbose=TRUE) ) {
                 writeLines(paste("Saving image to", fileOutFull))
-                plotly_IMAGE(exprPlotlyObj, format="png", out_file=fileOutFull)
+                plotly_IMAGE(meanPlotlyObj, format="png", out_file=fileOutFull)
             }
         }
     }
     
-    return(exprPlotlyObj)
+    return(meanPlotlyObj)
 
 # # These don't retain stuff you do with layout():
 # htmlwidgets::saveWidget(as_widget(exprPlotlyObj), "/Users/nelsonlab/Documents/exprTest.html")
