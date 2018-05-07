@@ -1,9 +1,9 @@
 
 
-# exprMean.R
+# exprHeatmap.R
 #
 # Given a gene-by-sample dataframe with expression values, and (optionally) a list of the genes and
-# samples you want included, make a one-column heatmap of mean expression using plotly.
+# samples you want included, make an expression heatmap using plotly.
 #
 # Note that, probably because I'm not set up to do the paying thing, some stuff doesn't get
 # incorporated into the output png.
@@ -15,8 +15,9 @@
 # sampleList = c("HTp2_1", "HTp2_2", "KOp2_1", "KOp2_2")
 # exprHeatmap(exprData, genes=geneList, samples=sampleList, fileOut="expr.png")
 
-exprMean = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE,
-                ylabSize=8, figHeightPerGene=20, figWidth = 200, colorsPlot = colorRamp(rev(c("turquoise1", "magenta"))), ncolors=5, plotTitle=NULL, minVal=NULL, maxVal=NULL, fileOut=NULL) {
+exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE, scaleGenes=TRUE, scaleByGroup=NULL,  
+                ylabSize=8, figHeightPerGene=20, figWidth = 300, colorsPlot = colorRamp(c("yellow", "red")), ncolors=5,
+                plotTitle="Expression heatmap", minVal=NULL, maxVal=NULL, fileOut=NULL) {
                     
     # Unnecessary once packaged
     library(plotly)
@@ -54,10 +55,21 @@ exprMean = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE,
         # zeros where expression was zero
         exprForPlot[exprTemp == 0] = 0
     }
+    if ( scaleGenes ) {
+        # If we're scaling the genes but weren't given control samples, scale to 0-to-1 range
+        if (is.null(scaleByGroup) ) {
+            normFun = function(v) {vnorm = (v-min(v)) / (max(v)-min(v)); return(vnorm)}
+            exprForPlot = t(apply(exprForPlot, 1, normFun))
+        } else {
+            exprForPlot = exprForPlot - rowMeans(exprForPlot[,scaleByGroup])
+        }
+    } else {
+        if (!scaleGenes) { stop("You gave me a group of samples to use in scaling expression, but scaleGenes is FALSE.") }
+    }
     
     # Vertically flip for heatmap
     exprForPlot = apply(exprForPlot, 2, rev)
-    
+
     ### Dimensions and colorscale stuff ######################################
     figHeightThis = figHeightPerGene*dim(exprForPlot)[1]
     # Min value for getting the color scale should be slightly smaller than actual min in data
@@ -70,20 +82,22 @@ exprMean = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE,
         if (max(exprForPlot) >= 0) { maxFactor = 1.05 } else {maxFactor = 0.95}
         maxVal = max(exprForPlot) * maxFactor
     }
-    
+
+
     ### Making the plot #######################################################
     # Make plotly object
-    meanPlotlyObj = plot_ly(z = cbind(rowMeans(exprForPlot), rowMeans(exprForPlot)),
-        x = rep('.', times=2), y = rownames(exprForPlot),
-        type='heatmap', colors = colorsPlot, height=figHeightThis, width = figWidth)
+    exprPlotlyObj = plot_ly(z = exprForPlot, x = colnames(exprForPlot), y = rownames(exprForPlot),
+                    type='heatmap', colors = colorsPlot,
+                    zmin = minVal, zmax = maxVal,
+                    height=figHeightThis, width = figWidth)
+
     # Set some layout stuff
-    meanPlotlyObj = layout(meanPlotlyObj,
-                        yaxis = list(tickfont = list(size = ylabSize, ticklen = 0),
-                        xaxis = list(ticklen = 0),
-                        title = plotTitle))
-                        
+    exprPlotlyObj = layout(exprPlotlyObj,
+                    yaxis = list(tickfont = list(size = ylabSize, tickvals = 1:dim(exprForPlot)[2]), ticklen = 0),
+                    xaxis = list(ticklen = 0),
+                    title = plotTitle)
     
-    
+
     # Save if given fileOut name
     if ( !is.null(fileOut) ) {
         fileOutFull = fileOut
@@ -91,12 +105,12 @@ exprMean = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE,
         if ( !is.null(fileOut) ) {
             if ( file_checks(fileOutFull, shouldExist=FALSE, verbose=TRUE) ) {
                 writeLines(paste("Saving image to", fileOutFull))
-                plotly_IMAGE(meanPlotlyObj, format="png", out_file=fileOutFull)
+                plotly_IMAGE(exprPlotlyObj, format="png", out_file=fileOutFull)
             }
         }
     }
     
-    return(meanPlotlyObj)
+    return(exprPlotlyObj)
 
 # # These don't retain stuff you do with layout():
 # htmlwidgets::saveWidget(as_widget(exprPlotlyObj), "/Users/nelsonlab/Documents/exprTest.html")

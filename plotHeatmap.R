@@ -1,5 +1,14 @@
 
 
+# UNFINISHED
+
+# plotHeatmap_new.R
+# 
+# Adding some options.
+# And putting them in the same order as the deeptools documentation.
+
+
+
 # plotHeatmap.R
 #
 # Very simple; just run through matrix files created by computeMatrix, creating an eps with histogram and heatmap for each one.
@@ -15,10 +24,6 @@
 # The latest version of deeptools by default uses interpolation method "bilinear", so I've set that to
 # be the default here.  However, it fails for our data (at least the TTX and the small RNA), whereas
 # "nearest" works.  
-#
-# Though it's told the color for missing data is white, it seems to be doing black anyway.  I believe this was
-# also true when doing it directly in the command line, in which case it's not about going through R.
-# But check that.
 #
 # outMatrix, if true, tells it to output the values in the matrix into an additional output file.
 # I think this might be mainly useful when you have a bunch of input files and this is combining them?
@@ -36,10 +41,13 @@
 # If you want to play with the parameters while looking at
 # just one file, this might be easiest.
 ########################################################
-# $ plotHeatmap -m samplename_genebody.mat.gz -out samplename_genebody.eps --sortRegions descend --colorMap hot_r -min 0 -max 1 --missingDataColor "#ffffff"
+# $ plotHeatmap -m samplename_genebody.mat.gz -out samplename_genebody.eps
 
 plotHeatmap = function(matrixFiles, deeptoolsPath="", outDest="./", outSuffix="", outMatrix=FALSE, 
-                       samplesLabels=NULL, regionsLabels=NULL, minVal=NULL, maxVal=NULL, interpolationMethod=bilinear) {
+                       interpolationMethod=NULL, dpi=NULL, sortRegions=NULL, 
+                       averageTypeSummaryPlot=NULL, missingDataColor=NULL, colorMap=NULL, 
+                       zMin=NULL, zMax=NULL, heatmapHeight=NULL, heatmapWidth=NULL, 
+                       startLabel=NULL, endLabel=NULL, samplesLabels=NULL, regionsLabel=NULL) {
     
     # Won't be necessary when this is in package
     # source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
@@ -49,7 +57,6 @@ plotHeatmap = function(matrixFiles, deeptoolsPath="", outDest="./", outSuffix=""
     source("/Users/work/Documents/rna-seq/file_checks.R")
     source("/Users/work/Documents/rna-seq/dir_check.R")
     library(tools) # for I forget what
-    library(glue)  # for collapse()
     
     # Check arguments
     if (! deeptoolsPath == "") {deeptoolsPath = dir_check(deeptoolsPath)}
@@ -69,28 +76,23 @@ plotHeatmap = function(matrixFiles, deeptoolsPath="", outDest="./", outSuffix=""
         
         # Define arguments to the plotHeatmap command
         fOut = paste(outDest, sub(".mat.gz", paste(outSuffix, ".eps", sep=""), m), sep="")
-        arguments = c("-m", m, "-out", fOut, "--sortRegions", "descend", "--colorMap", "hot_r", 
-                      "--missingDataColor", "white", 
-                      "--interpolationMethod", interpolationMethod)
-        if (outMatrix) {
-            arguments = c(arguments, "--outFileNameMatrix", sub("mat.gz", "txt", m))
-        }
-        
-        if ( !is.null(samplesLabels) ) {
-            arguments = c(arguments, "--samplesLabel", samplesLabels[counter])
-        }
-        
-        if ( !is.null(regionsLabels) ) {
-            arguments = c(arguments, "--regionsLabel", collapse(paste("\'", regionsLabels, "\'", sep=""), sep=" "))
-        }
-        
-        if ( !is.null(minVal) ) {
-            arguments = c(arguments, "-min", minVal)
-        }
-        
-        if ( !is.null(maxVal) ) {
-            arguments = c(arguments, "-max", maxVal)
-        }
+        arguments = c("-m", m, "-out", fOut)
+        if (outMatrix) { arguments = c(arguments, "--outFileNameMatrix", sub(".mat.gz", "_heatmap_mat.txt", m)) }
+        if ( !is.null(interpolationMethod) ) { arguments = c(arguments, "--interpolationMethod", interpolationMethod) }
+        if ( !is.null(dpi) ) { arguments = c(arguments, "--dpi", dpi) }
+        if ( !is.null(sortRegions) ) { arguments = c(arguments, "--sortRegions", sortRegions) }
+        if ( !is.null(averageTypeSummaryPlot) ) { arguments = c(arguments, "--averageTypeSummaryPlot", averageTypeSummaryPlot) }
+        if ( !is.null(missingDataColor) ) { arguments = c(arguments, "--missingDataColor", missingDataColor) }
+        if ( !is.null(colorMap) ) { arguments = c(arguments, "--colorMap", colorMap) }
+        if ( !is.null(zMin) ) { arguments = c(arguments, "-min", zMin) }
+        if ( !is.null(zMax) ) { arguments = c(arguments, "-max", zMax) }
+        if ( !is.null(heatmapHeight) ) { arguments = c(arguments, "--heatmapHeight", heatmapHeight) }
+        if ( !is.null(heatmapWidth) ) { arguments = c(arguments, "--heatmapWidth", heatmapWidth) }
+        if ( !is.null(startLabel) ) { arguments = c(arguments, "--startLabel", paste("'", startLabel, "'", sep="")) }
+        if ( !is.null(endLabel) ) { arguments = c(arguments, "--endLabel", paste("'", endLabel, "'", sep="")) }
+        if ( !is.null(samplesLabels) ) { arguments = c(arguments, "--samplesLabel", samplesLabels[counter]) }
+        if ( !is.null(regionsLabel) ) { arguments = c(arguments, "--regionsLabel", paste("'", regionsLabel, "'", collapse=" ")) }
+
         
         #################
         # Get output file
