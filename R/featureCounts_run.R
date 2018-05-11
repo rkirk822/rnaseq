@@ -9,9 +9,10 @@
 #' @param runThreadN Numeric - How many cores to use
 #' @param multimappers Logical - Whether to count multi-mapping reads.  All reported alignments will be counted, using the 'NH' tag in the BAMs/SAMs.
 #' @details Take a list of SAM or BAM files, and get counts of reads mapped to genomic features in specified annotations file.
+#' Command issued will be written to a text file, particularly so you can confirm the annotation file used (unless its filename gets changed).
 #' TIME:  ~1.5m per BAM.
-#'  Example at the command line (if you want to play with the parameters while looking at just one file, this might be easiest):
-#' featureCounts -a $annotFile -O -o $outputFile $inputFile -T $nCores 2> $outputFileDisp
+#' Example at the command line (if you want to play with the parameters while looking at just one file, this might be easiest):
+#' featureCounts -a $annotFile -O -o $outputFile $inputFile -T $nCores
 #' @examples
 #' annotFile=/Volumes/CodingClub1/STAR_stuff/annotations/mm10_refGene.gtf
 #' annotFile=/Volumes/CodingClub1/STAR_stuff/annotations/mm10_refSeq_introns_geneids.gtf
@@ -44,7 +45,9 @@ featureCounts_run = function(readFilesIn, annotFile, fcPath="/opt/subread-1.6.0-
             if ( multimappers ) { arguments = c(arguments, "-M") }
 
             # Get the counts
-            system2( paste(fcPath, "featureCounts", sep=""), args = arguments, stderr = fErr )
+            system2( paste(fcPath, "featureCounts", sep=""), args = arguments)
+
+            # Save information about command to a textfile
 
         }
 

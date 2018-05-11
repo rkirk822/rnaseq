@@ -50,13 +50,12 @@ STAR_run(readFilesIn, genomeDir, starPath = "/opt/STAR/bin/MacOSX_x86_64/",
 \item{quantMode}{String - Get either read counts or transcript coordinates ("GeneCounts" or "TranscriptomeSAM")}
 }
 \description{
-Map reads from fastq files to genome using STAR. Most parameter descriptions are from STAR manual.
+Map reads to genome using STAR. Most parameter descriptions are from STAR manual.
 }
 \details{
 Take a list of fastq files containing reads, and get alignments with STAR.  Default parameter values are defaults for STAR 2.5.3.
 See manual for details on those.  Override by defining "settings" as "ENCODE_long" or "ENCODE_short" to use ENCODE settings for long or short RNA.
-THIS WILL BE FASTER IF I COLLAPSE INPUT FILES AND DO JUST ONE STAR COMMAND.
-Because it'll only load the reference genome once.
+If an input file doesn't exist, you'll get an error.  If an output file (at least a Log.out file) does exist, it'll just skip the corresponding input file.
 TIME:
 Roughly 10m per 5G data file.
 5h 30m for all 28 RORb data files.
@@ -68,7 +67,9 @@ Roughly 10m per 5G data file.
 /opt/STAR/bin/MacOSX_x86_64/STAR --genomeDir $genomeDir --readFilesIn $pathTrimmed$sn$trimmedSuffix --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 999 --outFilterMismatchNoverLmax 0.04 --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 --outSAMtype 'BAM SortedByCoordinate' --outFileNamePrefix $pathMapped$sn$mappedSuffix#'
 }
 \examples{
-genomeDir='/Volumes/CodingClub1/STAR_stuff/indexes/generated_with_gtf_from_mysql/' # generated to be ideal for files w/ max read len 75 (or 76?)
+gdir = '/Volumes/CodingCLub1/STAR_stuff/indexes/refGene_gtf_maxLen75/'
+fIn=list.files(paste(projectPath, "trimmed/", sep=""), pattern='fastq')
+STAR_run(paste(projectPath, "trimmed/", fIn, sep=""), outDest=paste(projectPath, "mapped/", sep=""), genomeDir = gdir, runThreadN = 8, settings = "ENCODE_long", outSAMtype = 'BAM SortedByCoordinate')
 }
 \author{
 Emma Myers
