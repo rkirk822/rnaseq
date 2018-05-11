@@ -1,15 +1,15 @@
 
-# UNFINISHED
-# Works but needs to be cleaned up, and variable names that were based on
-# the TTX data need to generalized.
+
+# Works but needs to be cleaned up and made into a function.
+# And column names of csv, near the bottom, still use "ttx" as treatment
+# condition name and have to be changed manually!  Fix that.
 
 #  make_summary_table.R
 #
 # Just do one table for each comparison in a separate file.  Then put them together manually.
-# Also removal of the bad TTX sample is hard-coded in.
 #
 # Columns should be:
-# Gene symbols, ctl mean, ctl stderr, TTX mean, TTX stderr, effect size, p-value.
+# Gene symbols, ctl mean, ctl stderr, treatment mean, treatment stderr, effect size, p-value.
 
 # Functions we'll be calling
 # source('/Users/emmamyers/Documents/Work_temp/code/read_fcounts.R')
@@ -30,6 +30,7 @@ stage = 'Late'
 resfile = paste('/Users/nelsonlab/Documents/Results_temporarily_here/TTX_results/', cellType, '_', stage, '_tpm_summary.csv', sep='')
 fileList = list.files(pattern=cellType)
 fileList = fileList[which(regexpr(stage, fileList)>0)]
+# # No longer removing bad TTX sample, but that's what this was
 #  if (any(fileList=='EMXTTXEarly_1_fcounts.txt')) {
 #     fileList = fileList[-which(fileList=='EMXTTXEarly_1_fcounts.txt')]
 # }
@@ -63,25 +64,25 @@ ctlMeans = rowMeans(exprMat[,ctlIdx])
 ctlSdevs = apply(exprMat[,ctlIdx], 1, sd)
 ctlSEs = ctlSdevs/sqrt(length(ctlIdx))
 
-# Get mean and standard error for TTX samples
-# ttxIdx = which(regexpr('p200', fileList)>0)
-ttxIdx = which(regexpr('TTX', fileList)>0)
-ttxMeans = rowMeans(exprMat[,ttxIdx])
-ttxSdevs = apply(exprMat[,ttxIdx], 1, sd)
-ttxSEs = ttxSdevs/sqrt(length(ttxIdx))
+# Get mean and standard error for treatment samples
+# tmIdx = which(regexpr('p200', fileList)>0)
+tmIdx = which(regexpr('TTX', fileList)>0)
+tmMeans = rowMeans(exprMat[,ttxIdx])
+tmSdevs = apply(exprMat[,ttxIdx], 1, sd)
+tmSEs = ttxSdevs/sqrt(length(ttxIdx))
 
 # Get log fold changes of mean values (control relative to TTX)
-lfcs = log2(ctlMeans/ttxMeans)
+lfcs = log2(ctlMeans/tmMeans)
 
 # do this separately in case we want to change / not do it
 ctlMeans = round(ctlMeans, digits=2)
 ctlSEs = round(ctlSEs, digits=2)
-ttxMeans = round(ttxMeans, digits=2)
-ttxSEs = round(ttxSEs, digits=2)
+tmMeans = round(tmMeans, digits=2)
+tmSEs = round(tmSEs, digits=2)
 lfcs = round(lfcs, digits=2)
 
 # Make dataframe and write to csv file
-df = data.frame(geneSyms, ctlMeans, ctlSEs, ttxMeans, ttxSEs, lfcs, pvals_limma)
+df = data.frame(geneSyms, ctlMeans, ctlSEs, tmMeans, tmSEs, lfcs, pvals_limma)
 colnames = c('Gene symbol', 'Mean (ctl)', 'SE (ctl)', 'Mean (ttx)', 'SE (ttx)', 'LFC (ctl mean:ttx mean)', 'p-value (limma)')
 writeLines('Writing table. . .')
 write.table(df, quote=FALSE, row.names=FALSE, col.names=colnames, file=resfile, sep=',')

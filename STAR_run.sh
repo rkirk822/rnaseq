@@ -66,16 +66,16 @@ do
     logfile=$pathMapped$sn$mappedSuffix'Log.out'
     if [ -f $logfile ]; then echo 'File ' $logFile ' already exists. Skipping sample.'; continue; fi
 
-# # Long RNA
+# # Long RNA, output format specified by $outSAMtype
 #     $pathSTAR --runThreadN $cores --genomeDir $genomeDir --readFilesIn $pathTrimmed$sn$trimmedSuffix --outFilterType $outFilterType --outFilterMultimapNmax $outFilterMultimapNmax --alignSJoverhangMin $alignSJoverhangMin --alignSJDBoverhangMin $alignSJDBoverhangMin --outFilterMismatchNmax $outFilterMismatchNmax --outFilterMismatchNoverLmax $outFilterMismatchNoverLmax --alignIntronMin $alignIntronMin --alignIntronMax $alignIntronMax --alignMatesGapMax $alignMatesGapMax --outSAMtype $outSAMtype --outFileNamePrefix $pathMapped$sn$mappedSuffix
 
-# Long RNA, with GeneCounts option
+# Long RNA, with GeneCounts option (this was to make sure it's pretty close to featureCounts output); output format specified by $outSAMtype
     $pathSTAR --runThreadN $cores --genomeDir $genomeDir --readFilesIn $pathTrimmed$sn$trimmedSuffix --outFilterType $outFilterType --outFilterMultimapNmax $outFilterMultimapNmax --alignSJoverhangMin $alignSJoverhangMin --alignSJDBoverhangMin $alignSJDBoverhangMin --outFilterMismatchNmax $outFilterMismatchNmax --outFilterMismatchNoverLmax $outFilterMismatchNoverLmax --alignIntronMin $alignIntronMin --alignIntronMax $alignIntronMax --alignMatesGapMax $alignMatesGapMax --outSAMtype $outSAMtype --outFileNamePrefix $pathMapped$sn$mappedSuffix --quantMode GeneCounts
 
-# # Long RNA, no outSAMtype because I can't figure out how to explicitly set it to default which is SAM
+# # Long RNA, SAM output (no outSAMtype because I can't figure out how to explicitly set it to default which is SAM)
 #     $pathSTAR --runThreadN $cores --genomeDir $genomeDir --readFilesIn $pathTrimmed$sn$trimmedSuffix --outFilterType $outFilterType --outFilterMultimapNmax $outFilterMultimapNmax --alignSJoverhangMin $alignSJoverhangMin --alignSJDBoverhangMin $alignSJDBoverhangMin --outFilterMismatchNmax $outFilterMismatchNmax --outFilterMismatchNoverLmax $outFilterMismatchNoverLmax --alignIntronMin $alignIntronMin --alignIntronMax $alignIntronMax --alignMatesGapMax $alignMatesGapMax --outFileNamePrefix $pathMapped$sn$mappedSuffix
 
-# # Short RNA
+# # Short RNA, SAM output (no outSAMtype because I can't figure out how to explicitly set it to default which is SAM)
 #     $pathSTAR --runThreadN $cores --genomeDir $genomeDir --readFilesIn $pathTrimmed$sn$trimmedSuffix --outFilterMismatchNoverLmax $outFilterMismatchNoverLmax --outFilterMultimapNmax $outFilterMultimapNmax --alignIntronMax $alignIntronMax --outFilterMatchNmin $outFilterMatchNmin --outFilterScoreMinOverLread $outFilterScoreMinOverLread --outFilterMatchNminOverLread $outFilterMatchNminOverLread --outFileNamePrefix $pathMapped$sn$mappedSuffix
 
 done

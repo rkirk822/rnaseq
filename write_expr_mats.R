@@ -12,9 +12,17 @@
 # When this toolbox is a package, turn this script into a function that takes a list of files and an optional tpm argument.  Include example of how to easily define file list in help text.
 
 
+# Delete when this is turned into a function and in the package
+source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/read_fcounts.R")
+source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/counts_to_tpm.R")
+# source('/Volumes/CodingClub1/RNAseq/code/read_fcounts.R')
+# source('/Volumes/CodingClub1/RNAseq/code/counts_to_tpm.R')
+# source("/Users/work/Documents/rna-seq/read_fcounts.R")
+# source("/Users/work/Documents/rna-seq/counts_to_tpm.R")
+
 ###############################################
-# This stuff depends on the dataset:
-# Working directory, fileList, resFile
+# Stuff to set:
+# Working directory, fileList, resFile, tpm
 ###############################################
 setwd("/Users/work/Documents/counts_nucseq/intronic_counts/")
 # setwd("/Volumes/DataStorage2/Emma/From_CodingClub1/RNAseq/TTX/counts/counts_m20_q20_no_comment/")
@@ -39,14 +47,6 @@ tpm = TRUE # If you want raw counts, set to FALSE
 if (file.exists(resFile)) {
     stop("Specified results file already exists.")
 }
-
-# # Functions we'll be calling - these lines will be unnecessary when I package this code
-# source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/read_fcounts.R")
-# source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/counts_to_tpm.R")
-# source('/Volumes/CodingClub1/RNAseq/code/read_fcounts.R')
-# source('/Volumes/CodingClub1/RNAseq/code/counts_to_tpm.R')
-source("/Users/work/Documents/rna-seq/read_fcounts.R")
-source("/Users/work/Documents/rna-seq/counts_to_tpm.R")
 
 # Read in the read counts
 writeLines("Reading in counts. . .")

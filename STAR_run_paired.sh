@@ -83,7 +83,7 @@ gunzip $infile1.gz
 echo Unzipping $infile2.gz
 gunzip $infile2.gz
 
-# # Short RNA
+# # Short RNA, SAM output
     $pathSTAR --runThreadN $cores --genomeDir $genomeDir --readFilesIn $infile1 $infile2 --outFilterMismatchNoverLmax $outFilterMismatchNoverLmax --outFilterMultimapNmax $outFilterMultimapNmax --alignIntronMax $alignIntronMax --outFilterMatchNmin $outFilterMatchNmin --outFilterScoreMinOverLread $outFilterScoreMinOverLread --outFilterMatchNminOverLread $outFilterMatchNminOverLread --outFileNamePrefix $logfull
 
 done

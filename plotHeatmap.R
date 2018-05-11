@@ -1,17 +1,8 @@
 
 
-# UNFINISHED
-
-# plotHeatmap_new.R
-# 
-# Adding some options.
-# And putting them in the same order as the deeptools documentation.
-
-
-
 # plotHeatmap.R
 #
-# Very simple; just run through matrix files created by computeMatrix, creating an eps with histogram and heatmap for each one.
+# Run through matrix files created by computeMatrix, creating an eps with histogram and heatmap for each one.
 #
 # IMPROVE: If given sample and region labels, some kind of check to see that they correspond to what's
 # in the matfile somehow.  And check the length of the character vectors to make sure it matches the
@@ -50,12 +41,12 @@ plotHeatmap = function(matrixFiles, deeptoolsPath="", outDest="./", outSuffix=""
                        startLabel=NULL, endLabel=NULL, samplesLabels=NULL, regionsLabel=NULL) {
     
     # Won't be necessary when this is in package
-    # source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
-    # source("/Volumes/CodingClub1/RNAseq/code/dir_check.R")
+    source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
+    source("/Volumes/CodingClub1/RNAseq/code/dir_check.R")
     # source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/file_checks.R")
     # source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/dir_check.R")
-    source("/Users/work/Documents/rna-seq/file_checks.R")
-    source("/Users/work/Documents/rna-seq/dir_check.R")
+    # source("/Users/work/Documents/rna-seq/file_checks.R")
+    # source("/Users/work/Documents/rna-seq/dir_check.R")
     library(tools) # for I forget what
     
     # Check arguments

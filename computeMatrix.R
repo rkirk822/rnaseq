@@ -1,18 +1,9 @@
 
 
-# UNFINISHED
-#
-# computeMatrix_new.R
-#
-# Make upstream and downstream be options instead of defaulting to 1000 for each.
-
-
 # computeMatrix.R help text
 #
 # Take a list of bigwigs and use the deeptools computeMatrix function to get a matrix file for each,
 # which can then be used by plotHeatmap to create an eps.
-#
-# I'm not yet building in flexibility with arguments to computeMatrix, but that should happen.
 #
 # IMPROVE: You have to be in the directory with the input files right now.  At least 
 # if you're giving it a matDest and maybe if you're not, I dunno.
@@ -44,12 +35,12 @@ computeMatrix = function(bigwigs, regionsFiles, deeptoolsPath="", matDest="./", 
                          nProcessors=1) {
 
     # Won't be necessary when this is in package
-    # source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
-    # source("/Volumes/CodingClub1/RNAseq/code/dir_check.R")
+    source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
+    source("/Volumes/CodingClub1/RNAseq/code/dir_check.R")
     # source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/file_checks.R")
     # source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/dir_check.R")
-    source("/Users/work/Documents/rna-seq/file_checks.R")
-    source("/Users/work/Documents/rna-seq/dir_check.R")
+    # source("/Users/work/Documents/rna-seq/file_checks.R")
+    # source("/Users/work/Documents/rna-seq/dir_check.R")
     library(tools)
 
     # Check arguments
