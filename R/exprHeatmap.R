@@ -97,7 +97,7 @@ exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE, scaleGe
     ### Making the plot #######################################################
     # Make plotly object
     exprPlotlyObj = plot_ly(z = exprForPlot, x = colnames(exprForPlot), y = rownames(exprForPlot),
-                    type='heatmap', colors = colorsPlot,
+                    type="heatmap", colors = colorsPlot,
                     zmin = minVal, zmax = maxVal,
                     height=figHeightThis, width = figWidth)
 

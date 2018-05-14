@@ -19,7 +19,7 @@
 #' @author Emma Myers
 #' @export
 
-bamToBed = function(filenames, bedtoolsPath = "", outDest = "./", outSuffix="" ) {
+bamToBed = function(filenames, bedtoolsPath = "/opt/bedtools2/bin/", outDest = "./", outSuffix="" ) {
 
     # Check arguments
     if (! bedtoolsPath == "") { bedtoolsPath = dir_check(bedtoolsPath) }

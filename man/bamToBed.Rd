@@ -4,7 +4,8 @@
 \alias{bamToBed}
 \title{Convert BAM files to bed format}
 \usage{
-bamToBed(filenames, bedtoolsPath = "", outDest = "./", outSuffix = "")
+bamToBed(filenames, bedtoolsPath = "/opt/bedtools2/bin/", outDest = "./",
+  outSuffix = "")
 }
 \arguments{
 \item{filenames}{Character - List of BAM files}

@@ -4,12 +4,12 @@
 \alias{featureCounts_run}
 \title{Read counts from BAM or SAM files}
 \usage{
-featureCounts_run(readFilesIn, annotFile,
+featureCounts_run(inFiles, annotFile,
   fcPath = "/opt/subread-1.6.0-MacOSX-x86_64/bin/", outDest = "./",
   outSuffix = "", runThreadN = 1, multimappers = FALSE)
 }
 \arguments{
-\item{readFilesIn}{Character - BAM or SAM file list}
+\item{inFiles}{Character - BAM or SAM file list}
 
 \item{annotFile}{String - Name (with path) of gtf file with annotations to define features}
 
