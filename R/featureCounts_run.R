@@ -8,9 +8,10 @@
 #' @param outSuffix String - will be appended to original filename (and followed by "_fcounts.txt")
 #' @param runThreadN Numeric - How many cores to use
 #' @param multimappers Logical - Whether to count multi-mapping reads.  All reported alignments will be counted, using the 'NH' tag in the BAMs/SAMs.
+#' @param dispToText Logical - Whether to send messages that featureCounts normally displays to the screen, to a text file instead
 #' @details Take a list of SAM or BAM files, and get counts of reads mapped to genomic features in specified annotations file.
 #' Command issued will be written to a text file, particularly so you can confirm the annotation file used (unless its filename gets changed).
-#' TIME:  ~1.5m per BAM.
+#' TIME:  1-3m per BAM.
 #' Example at the command line (if you want to play with the parameters while looking at just one file, this might be easiest):
 #' featureCounts -a $annotFile -O -o $outputFile $inputFile -T $nCores
 #' @examples
@@ -21,7 +22,7 @@
 #' @export
 
 featureCounts_run = function(inFiles, annotFile, fcPath="/opt/subread-1.6.0-MacOSX-x86_64/bin/", outDest="./", outSuffix="", runThreadN=1,
-                             multimappers=FALSE) {
+                             multimappers=FALSE, dispToText=FALSE) {
 
     # Check arguments
     if ( !all(file.exists(inFiles)) ) {
@@ -46,13 +47,19 @@ featureCounts_run = function(inFiles, annotFile, fcPath="/opt/subread-1.6.0-MacO
             if ( multimappers ) { arguments = c(arguments, "-M") }
 
             # Get the counts
-            system2( paste(fcPath, "featureCounts", sep=""), args = arguments)
+            tStart = proc.time()[3]
+            if (dispToText) {
+                system2( paste(fcPath, "featureCounts", sep=""), args = arguments, stderr = gsub("_fcounts.txt", "_display.txt", fOut) )
+            } else { system2( paste(fcPath, "featureCounts", sep=""), args = arguments) }
 
             # Save information about command to a textfile
-            fRecord = gsub("_fcounts.txt", "_record.txt", fOut)
-            con = file(fRecord, "w")
-            writeLines( paste( paste(fcPath, "featureCounts", sep=""), paste(arguments, collapse=" ") ) )
-            close(con)
+            fRecordCon = file(gsub("_fcounts.txt", "_record.txt", fOut), "w")
+            writeLines( paste( paste(fcPath, "featureCounts", sep=""), paste(arguments, collapse=" ") ), con = fRecordCon )
+            close(fRecordCon)
+
+            tElapsed = proc.time()[3] - tStart
+            writeLines(paste("done (", round(tElapsed/60, digits=2), "m).", sep=""))
+
         }
 
     }

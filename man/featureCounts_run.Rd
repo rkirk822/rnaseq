@@ -6,7 +6,8 @@
 \usage{
 featureCounts_run(inFiles, annotFile,
   fcPath = "/opt/subread-1.6.0-MacOSX-x86_64/bin/", outDest = "./",
-  outSuffix = "", runThreadN = 1, multimappers = FALSE)
+  outSuffix = "", runThreadN = 1, multimappers = FALSE,
+  dispToText = FALSE)
 }
 \arguments{
 \item{inFiles}{Character - BAM or SAM file list}
@@ -22,6 +23,8 @@ featureCounts_run(inFiles, annotFile,
 \item{runThreadN}{Numeric - How many cores to use}
 
 \item{multimappers}{Logical - Whether to count multi-mapping reads.  All reported alignments will be counted, using the 'NH' tag in the BAMs/SAMs.}
+
+\item{dispToText}{Logical - Whether to send messages that featureCounts normally displays to the screen, to a text file instead}
 }
 \description{
 Get raw counts of reads mapped to specified genomic features using featureCount tool from the subread package.
@@ -35,7 +38,8 @@ featureCounts -a $annotFile -O -o $outputFile $inputFile -T $nCores
 }
 \examples{
 annotFile=/Volumes/CodingClub1/STAR_stuff/annotations/mm10_refGene.gtf
-annotFile=/Volumes/CodingClub1/STAR_stuff/annotations/mm10_refSeq_introns_geneids.gtf
+# For intronic read counts:
+annotFile=/Volumes/CodingClub1/RNAseq/Metadata/mm10_refSeq_introns_geneids.gtf
 }
 \author{
 Emma Myers

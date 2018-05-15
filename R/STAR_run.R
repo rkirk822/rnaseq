@@ -23,12 +23,8 @@
 #' See manual for details on those.  Override by defining "settings" as "ENCODE_long" or "ENCODE_short" to use ENCODE settings for long or short RNA.
 #' If an input file doesn't exist, you'll get an error.  If an output file (at least a Log.out file) does exist, it'll just skip the corresponding input file.
 #' TIME:
-#' Roughly 10m per 5G data file.
-#' 5h 30m for all 28 RORb data files.
-#' 4h 45m for the 15 EMX-Cre data files.
-#' 3hr 30m for the 14 PV data files.
-#' ~30m for the Nuc-seq data (12 files?), minus one file.
-#'  Example at the command line using ENCODE settings for long RNA
+#' ~10m per 5G fastq.  3-6 hours for an entire total-RNA dataset (~25-30 samples).  Nuc-seq took only ~30m.
+#' COMMAND LINE EXAMPLE, using ENCODE settings for long RNA
 #' (if you want to play with the parameters while looking at just one file, this might be easiest):
 #' /opt/STAR/bin/MacOSX_x86_64/STAR --genomeDir $genomeDir --readFilesIn $pathTrimmed$sn$trimmedSuffix --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 999 --outFilterMismatchNoverLmax 0.04 --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 --outSAMtype 'BAM SortedByCoordinate' --outFileNamePrefix $pathMapped$sn$mappedSuffix#'
 #' @examples
@@ -83,7 +79,7 @@ STAR_run = function(readFilesIn, genomeDir, starPath="/opt/STAR/bin/MacOSX_x86_6
         writeLines(paste("\nProcessing file:", f))
 
         fOut = paste(outDest, gsub(paste(".", tools::file_ext(f), sep=""), "", basename(f)), outSuffix, "_", sep="")
-        writeLines(fOut)
+
         # Check if there's already a log file for this file
         if ( file_checks(paste(fOut, "Log.out", sep=""), shouldExist=FALSE, verbose=TRUE) ) {
 
