@@ -32,7 +32,7 @@ Get raw counts of reads mapped to specified genomic features using featureCount 
 \details{
 Take a list of SAM or BAM files, and get counts of reads mapped to genomic features in specified annotations file.
 Command issued will be written to a text file, particularly so you can confirm the annotation file used (unless its filename gets changed).
-TIME:  ~1.5m per BAM.
+TIME:  1-3m per BAM.
 Example at the command line (if you want to play with the parameters while looking at just one file, this might be easiest):
 featureCounts -a $annotFile -O -o $outputFile $inputFile -T $nCores
 }

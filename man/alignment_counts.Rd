@@ -4,11 +4,11 @@
 \alias{alignment_counts}
 \title{Get alignment counts from BAM files}
 \usage{
-alignment_counts(filenames, samtoolsPath = "", what = "passedQC",
-  verbose = FALSE)
+alignment_counts(inFiles, samtoolsPath = "~/anaconda2/bin/",
+  what = "passedQC", verbose = FALSE)
 }
 \arguments{
-\item{filenames}{Character - BAM file list}
+\item{inFiles}{Character - BAM file list}
 
 \item{samtoolsPath}{String - path to samtools directory}
 
@@ -23,12 +23,14 @@ Numeric vector? - Read count for each BAM
 Given a list of BAM files, return an array of unique (primary) alignments.
 }
 \details{
-I'm leaving the function name ambiguous because it might make sense to give it an option to include,
-say, multi-mapped alignments.
+Might make sense to give it an option to include, say, multi-mapped alignments.
 Requires samtools to be installed.
 }
 \examples{
-uniqueReads = alignment_counts(c("S1.bam", "S2.bam"), samtoolsPath="/opt/samtools-0.1.18")
+readCounts = alignment_counts(bams, verbose=TRUE)
+pdf("countsBar.pdf")
+barplot(readCounts/1000000, las=2, main="Aligned reads", cex.names = 0.5, names.arg=gsub("_mapped_Aligned.sortedByCoord.out.bam", "", bams), ylab="Millions")
+dev.off()
 }
 \author{
 Emma Myers

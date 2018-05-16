@@ -1,24 +1,31 @@
 #' Get alignment counts from BAM files
 #'
 #' Given a list of BAM files, return an array of unique (primary) alignments.
-#' @param filenames Character - BAM file list
+#' @param inFiles Character - BAM file list
 #' @param samtoolsPath String - path to samtools directory
 #' @param what String - What type of reads to include
 #' @param verbose Logical - whether to print progress / results
 #' @return Numeric vector? - Read count for each BAM
-#' @details I'm leaving the function name ambiguous because it might make sense to give it an option to include,
-#' say, multi-mapped alignments.
+#' @details Might make sense to give it an option to include, say, multi-mapped alignments.
 #' Requires samtools to be installed.
+#' TIME:  ~1m / BAM.
 #' @examples
-#' uniqueReads = alignment_counts(c("S1.bam", "S2.bam"), samtoolsPath="/opt/samtools-0.1.18")
+#' readCounts = alignment_counts(bams, verbose=TRUE)
+#' pdf("countsBar.pdf")
+#' barplot(readCounts/1000000, las=2, main="Aligned reads", cex.names = 0.5, names.arg=gsub("_mapped_Aligned.sortedByCoord.out.bam", "", bams), ylab="Millions")
+#' dev.off()
 #' @author Emma Myers
 #' @export
 
-alignment_counts = function(filenames, samtoolsPath="", what="passedQC", verbose=FALSE) {
+alignment_counts = function(inFiles, samtoolsPath="~/anaconda2/bin/", what="passedQC", verbose=FALSE) {
 
-    # Won't be necessary when this is in package
-    # source("/Users/nelsonlab/Documents/Toolboxes/rna-seq/file_checks.R")
-    # source("/Volumes/CodingClub1/RNAseq/code/file_checks.R")
+    # Check arguments
+    if ( !all(file.exists(inFiles)) ) {
+        writeLines("Missing input files:")
+        writeLines(inFiles[which(!file.exists(inFiles))])
+        stop("Missing input file(s).  See above.")
+    }
+    if (! samtoolsPath == "") { samtoolsPath = dir_check(path.expand(samtoolsPath)) }
 
     # What reads do we want to count
     if (what == "passedQC") {
@@ -30,20 +37,17 @@ alignment_counts = function(filenames, samtoolsPath="", what="passedQC", verbose
     }
 
 
-    counts = array(dim = length(filenames))
+    counts = array(dim = length(inFiles))
     counter = 1
 
-    for (f in filenames) {
-
-        if (verbose) { writeLines("\n") }
-
-        # Make sure file exists.  Should be checking that it's either .bam or .sam too.
-        if ( ! file_checks(f, verbose=TRUE) ) { next }
+    for (f in inFiles) {
 
         # Get primary alignment count
-        if (verbose) { writeLines(paste("Processing file:", f, "...", sep=""), sep="") }
+        if (verbose) { writeLines(paste("\nProcessing file:", f, "...", sep=""), sep="") }
+        tStart = proc.time()[3]
         counts[counter] = as.numeric(system2( paste(samtoolsPath, "samtools", sep=""), args = c(args_except_file, f), stdout = TRUE ))
-        if (verbose) { writeLines("Done.") }
+        tElapsed = proc.time()[3] - tStart
+        if (verbose) { writeLines(paste("done (", round(tElapsed/60, digits=2), "m).", sep="")) }
 
         # Increment counter
         counter = counter + 1

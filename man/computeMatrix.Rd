@@ -4,7 +4,7 @@
 \alias{computeMatrix}
 \title{Read density per region}
 \usage{
-computeMatrix(inFiles, regionsFiles, deeptoolsPath = "", matDest = "./",
+computeMatrix(inFiles, regionsFiles, deeptoolsPath = "", outDest = "./",
   outSuffix = "", textMatrix = FALSE, startLabel = NULL,
   endLabel = NULL, skipZeros = FALSE, missingDataAsZero = FALSE,
   maxThreshold = NULL, minThreshold = NULL, upstream = 0,
@@ -16,11 +16,11 @@ computeMatrix(inFiles, regionsFiles, deeptoolsPath = "", matDest = "./",
 
 \item{deeptoolsPath}{String - Path to deeptools directory}
 
+\item{outDest}{String - Directory where matrix files should be written}
+
 \item{outSuffix}{String - will be appended to original filename (and ".bedgraph" is replaced by ".bigwig")}
 
 \item{genomeSizeFile}{String - Filename (with path) to text file containing genome size information}
-
-\item{bwDest}{String - Directory where bigwig files should be written}
 }
 \description{
 Write matrix containing read density per region from bigwig files
