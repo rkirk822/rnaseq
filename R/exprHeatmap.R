@@ -96,16 +96,16 @@ exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE, scaleGe
 
     ### Making the plot #######################################################
     # Make plotly object
-    exprPlotlyObj = plot_ly(z = exprForPlot, x = colnames(exprForPlot), y = rownames(exprForPlot),
+    exprPlotlyObj = plotly::plot_ly(z = exprForPlot, x = colnames(exprForPlot), y = rownames(exprForPlot),
                     type="heatmap", colors = colorsPlot,
                     zmin = minVal, zmax = maxVal,
                     height=figHeightThis, width = figWidth)
 
     # Set some layout stuff
-    exprPlotlyObj = layout(exprPlotlyObj,
-                    yaxis = list(tickfont = list(size = ylabSize, tickvals = 1:dim(exprForPlot)[2]), ticklen = 0),
-                    xaxis = list(ticklen = 0),
-                    title = plotTitle)
+    exprPlotlyObj = plotly::layout(exprPlotlyObj,
+                           yaxis = list(tickfont = list(size = ylabSize, tickvals = 1:dim(exprForPlot)[2]), ticklen = 0),
+                           xaxis = list(ticklen = 0),
+                           title = plotTitle)
 
 
     # Save if given fileOut name
@@ -115,7 +115,7 @@ exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE, scaleGe
         if ( !is.null(fileOut) ) {
             if ( file_checks(fileOutFull, shouldExist=FALSE, verbose=TRUE) ) {
                 writeLines(paste("Saving image to", fileOutFull))
-                plotly_IMAGE(exprPlotlyObj, format="png", out_file=fileOutFull)
+                plotly::plotly_IMAGE(exprPlotlyObj, format="png", out_file=fileOutFull)
             }
         }
     }

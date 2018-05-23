@@ -90,14 +90,14 @@ exprLFC = function(exprDataFrame, sampleGroups, genes=NULL,
 
     ### Making the plot #######################################################
     # Make plotly object
-    lfcPlotlyObj = plot_ly(z = cbind(lfc, lfc), x = rep('.', times=2), y = names(lfc),
+    lfcPlotlyObj = plotly::plot_ly(z = cbind(lfc, lfc), x = rep('.', times=2), y = names(lfc),
                     type='heatmap', colors = colorsPlot, zmin = minVal, zmax = maxVal,
                     height=figHeightThis, width = figWidth)
     # Set some layout stuff
-    lfcPlotlyObj = layout(lfcPlotlyObj,
-                        yaxis = list(tickfont = list(size = ylabSize, ticklen = 0),
+    lfcPlotlyObj = plotly::layout(lfcPlotlyObj,
+                        yaxis = list(tickfont = list(size = ylabSize, ticklen = 0)),
                         xaxis = list(ticklen = 0),
-                        title = plotTitle))
+                        title = plotTitle)
 
 
     # Save if given fileOut name
@@ -107,7 +107,7 @@ exprLFC = function(exprDataFrame, sampleGroups, genes=NULL,
         if ( !is.null(fileOut) ) {
             if ( file_checks(fileOutFull, shouldExist=FALSE, verbose=TRUE) ) {
                 writeLines(paste("Saving image to", fileOutFull))
-                plotly_IMAGE(lfcPlotlyObj, format="png", out_file=fileOutFull)
+                plotly::plotly_IMAGE(lfcPlotlyObj, format="png", out_file=fileOutFull)
             }
         }
     }

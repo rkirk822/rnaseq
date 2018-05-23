@@ -35,7 +35,7 @@ a bedgraph file with histogram of coverage values.
 Requires bedtools and samtools to be installed.
 Requires tools package.
 Note that it's a bit faster with bed than bam input files.  But if you do "norm", you have to give it a BAM file, not a bed file.
-Time:  On yasuimac, 2.5m for 600 MB bam file
+TIME:  On yasuimac, 2.5m for 600 MB bam file
              4m for an 815 MB bam file
              Slightly shorter starting from bed file (2 and 3m).
 IMPROVE:

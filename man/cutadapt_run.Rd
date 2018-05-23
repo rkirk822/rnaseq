@@ -33,7 +33,8 @@ cutadapt_run(readFilesIn, adapters = list(TruSeq_Universal =
 Trim reads using cutadapt.  Written using cutadapt v1.16.
 }
 \details{
-Cutadapt's report, normally displayed in the terminal, goes to originalFileName_report.txt.
+Cutadapt's report, normally displayed in the terminal, goes to originalFileName_report.txt.  Keep these.  They're good if you need to quickly look back
+at an early stage of processing, and the count_reads function reads them to get a vector of total read counts so you can quickly plot counts per sample.
 That report includes the command line parameters, so whatever you use in this script as the adapter sequences, quality cutoff, etc, will appear there.
 TIME:
 For 5-6 GB fastq files, about 15m.

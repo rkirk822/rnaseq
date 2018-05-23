@@ -6,7 +6,7 @@
 \usage{
 exprMean(exprDataFrame, genes = NULL, samples = NULL, L2 = TRUE,
   ylabSize = 8, figHeightPerGene = 20, figWidth = 200,
-  colorsPlot = colorRamp(rev(c("turquoise1", "magenta"))), ncolors = 5,
+  colorsPlot = colorRamp(c("turquoise1", "magenta")), ncolors = 5,
   plotTitle = NULL, minVal = NULL, maxVal = NULL, fileOut = NULL)
 }
 \arguments{

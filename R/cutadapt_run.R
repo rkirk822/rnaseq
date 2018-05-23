@@ -10,7 +10,8 @@
 #' @param minLen Numeric - Reads shorter than this will be tossed
 #' @param nAdapt Numeric - Cutadapt will assume there could be as many adapters as this on a given read
 #' @param trimn Logical - Whether to trim flanking Ns (unknown bases)
-#' @details Cutadapt's report, normally displayed in the terminal, goes to originalFileName_report.txt.
+#' @details Cutadapt's report, normally displayed in the terminal, goes to originalFileName_report.txt.  Keep these.  They're good if you need to quickly look back
+#' at an early stage of processing, and the count_reads function reads them to get a vector of total read counts so you can quickly plot counts per sample.
 #' That report includes the command line parameters, so whatever you use in this script as the adapter sequences, quality cutoff, etc, will appear there.
 #' TIME:
 #' For 5-6 GB fastq files, about 15m.
@@ -33,6 +34,11 @@ cutadapt_run = function(readFilesIn,
                         qualityCutoff=c(0,0), minLen=0, nAdapt=1, trimn=FALSE) {
 
     # Check arguments
+    if ( !all(file.exists(readFilesIn)) ) {
+        writeLines("Missing input files:")
+        writeLines(readFilesIn[which(!file.exists(readFilesIn))])
+        stop("Missing input file(s).  See above.")
+    }
     if (! cutadaptPath == "") { cutadaptPath = dir_check(path.expand(cutadaptPath)) }
     outDest = dir_check(outDest)
 
@@ -48,10 +54,7 @@ cutadapt_run = function(readFilesIn,
 
     for (f in readFilesIn) {
 
-        writeLines("\n")
-        # Make sure file exists
-        if ( ! file_checks(f, verbose=TRUE) ) { next }
-        writeLines(paste("Processing file:", f))
+        writeLines(paste("\nProcessing file:", f))
 
         # Create output filenames
         fOut = paste(outDest, gsub(paste(".", tools::file_ext(f), sep=""), "", basename(f)), outSuffix, "_trimmed.", tools::file_ext(f), sep="")

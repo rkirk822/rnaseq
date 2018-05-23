@@ -25,7 +25,7 @@
 
 exprMean = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE,
                 ylabSize=8, figHeightPerGene=20, figWidth = 200,
-                colorsPlot = colorRamp(rev(c("turquoise1", "magenta"))),
+                colorsPlot = colorRamp(c("turquoise1", "magenta")),
                 ncolors=5, plotTitle=NULL, minVal=NULL, maxVal=NULL, fileOut=NULL) {
 
     ### Check inputs ######################################################
@@ -78,14 +78,14 @@ exprMean = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE,
 
     ### Making the plot #######################################################
     # Make plotly object
-    meanPlotlyObj = plot_ly(z = cbind(rowMeans(exprForPlot), rowMeans(exprForPlot)),
+    meanPlotlyObj = plotly::plot_ly(z = cbind(rowMeans(exprForPlot), rowMeans(exprForPlot)),
         x = rep('.', times=2), y = rownames(exprForPlot),
         type='heatmap', colors = colorsPlot, height=figHeightThis, width = figWidth)
     # Set some layout stuff
-    meanPlotlyObj = layout(meanPlotlyObj,
-                        yaxis = list(tickfont = list(size = ylabSize, ticklen = 0),
-                        xaxis = list(ticklen = 0),
-                        title = plotTitle))
+    meanPlotlyObj = plotly::layout(meanPlotlyObj,
+                           yaxis = list(tickfont = list(size = ylabSize, ticklen = 0)),
+                           xaxis = list(ticklen = 0),
+                           title = plotTitle)
 
 
 
@@ -96,7 +96,7 @@ exprMean = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE,
         if ( !is.null(fileOut) ) {
             if ( file_checks(fileOutFull, shouldExist=FALSE, verbose=TRUE) ) {
                 writeLines(paste("Saving image to", fileOutFull))
-                plotly_IMAGE(meanPlotlyObj, format="png", out_file=fileOutFull)
+                plotly::plotly_IMAGE(meanPlotlyObj, format="png", out_file=fileOutFull)
             }
         }
     }
