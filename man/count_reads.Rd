@@ -4,7 +4,7 @@
 \alias{count_reads}
 \title{Get read counts from fastqs}
 \usage{
-count_reads(inFiles, what = "all", verbose = FALSE)
+count_reads(inFiles, verbose = TRUE)
 }
 \arguments{
 \item{inFiles}{Character - List of fastqs}
@@ -20,7 +20,7 @@ Given a list of fastq files, return an array of read counts.
 \details{
 If you use (unzipped!) fastqs, this function will call wc -l through the command line to get the number of reads in the file,
 and then divide by 4 to get the read count (fastqs include 4 lines for each read).
-TIME:
+TIME:  Roughly 30s per GB, if you look at the fastq file sizes.
 }
 \examples{
 readCounts = count_reads(reportFiles)

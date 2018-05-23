@@ -5,6 +5,7 @@
 #' @param samtoolsPath String - path to samtools directory
 #' @param what String - What type of reads to include
 #' @param verbose Logical - whether to print progress / results
+#' @param outFile String - Name of file to write counts to, or NULL (this function can take awhile, and there's no safeguard against overwriting this file here)
 #' @return Numeric vector? - Alignment count for each BAM
 #' @details Might make sense to give it an option to include, say, multi-mapped alignments.
 #' Requires samtools to be installed.
@@ -20,7 +21,7 @@
 #' @author Emma Myers
 #' @export
 
-count_alignments = function(inFiles, samtoolsPath="~/anaconda2/bin/", what="primary", verbose=TRUE) {
+count_alignments = function(inFiles, samtoolsPath="~/anaconda2/bin/", what="primary", verbose=TRUE, outFile="alignmentCounts.txt") {
 
     # Check arguments
     if ( !all(file.exists(inFiles)) ) {
@@ -46,7 +47,7 @@ count_alignments = function(inFiles, samtoolsPath="~/anaconda2/bin/", what="prim
     for (f in inFiles) {
 
         # Get primary alignment count
-        if (verbose) { writeLines(paste("\nProcessing file:", f, "...", sep=""), sep="") }
+        if (verbose) { writeLines(paste("\nProcessing file: ", f, "...", sep=""), sep="") }
         tStart = proc.time()[3]
         counts[counter] = as.numeric(system2( paste(samtoolsPath, "samtools", sep=""), args = c(args_except_file, f), stdout = TRUE ))
         tElapsed = proc.time()[3] - tStart
@@ -55,6 +56,17 @@ count_alignments = function(inFiles, samtoolsPath="~/anaconda2/bin/", what="prim
         # Increment counter
         counter = counter + 1
 
+    }
+
+    # Things that are likely to be in the input file names
+    n = gsub("_Aligned", "", basename(inFiles))
+    n = gsub(".sortedByCoord", "", n)
+    n = gsub(".out.bam", "", n)
+    names(counts) = n
+
+    if (!is.null(outFile)) {
+        if (verbose) { writeLines(paste( "\nAlignment counts will be written to", outFile )) }
+        write.table(counts, file=outFile, col.names=FALSE, quote=FALSE)
     }
 
     return(counts)

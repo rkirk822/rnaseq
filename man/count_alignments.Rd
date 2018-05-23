@@ -5,7 +5,7 @@
 \title{Get alignment counts from BAM files}
 \usage{
 count_alignments(inFiles, samtoolsPath = "~/anaconda2/bin/",
-  what = "primary", verbose = TRUE)
+  what = "primary", verbose = TRUE, outFile = "alignmentCounts.txt")
 }
 \arguments{
 \item{inFiles}{Character - BAM file list}
@@ -15,6 +15,8 @@ count_alignments(inFiles, samtoolsPath = "~/anaconda2/bin/",
 \item{what}{String - What type of reads to include}
 
 \item{verbose}{Logical - whether to print progress / results}
+
+\item{outFile}{String - Name of file to write counts to, or NULL (this function can take awhile, and there's no safeguard against overwriting this file here)}
 }
 \value{
 Numeric vector? - Alignment count for each BAM

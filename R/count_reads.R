@@ -6,8 +6,7 @@
 #' @return Numeric vector? - Read count for each input file
 #' @details If you use (unzipped!) fastqs, this function will call wc -l through the command line to get the number of reads in the file,
 #' and then divide by 4 to get the read count (fastqs include 4 lines for each read).
-#' TIME:
-#'
+#' TIME:  Roughly 30s per GB, if you look at the fastq file sizes.
 #' @examples
 #' readCounts = count_reads(reportFiles)
 #' pdf("countsBar.pdf")
@@ -16,7 +15,7 @@
 #' @author Emma Myers
 #' @export
 
-count_reads = function(inFiles, what="all", verbose=FALSE) {
+count_reads = function(inFiles, verbose=TRUE) {
 
     # Check arguments
     if ( !all(file.exists(inFiles)) ) {
