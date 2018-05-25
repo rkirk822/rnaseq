@@ -1,8 +1,8 @@
 #' Write expression values to csv
 #'
 #' Read counts from featureCounts output and write them to a csv file.  Gene-by-sample matrix.
-#' @param filenames Character - List of featureCounts output files (not the ones that end in "summary" or "report")
-#' @param outPrefix String - Output filename (sans path) will be this followed by ".csv" or "_TPM.csv", if TPM=TRUE
+#' @param inFiles Character - List of featureCounts output files (not the ones that end in "summary" or "report")
+#' @param outPrefix String - Output filename will be this followed by ".csv" (or "_TPM.csv", if TPM=TRUE).  Include path if you don't want current directory.
 #' @param tpm Logical - If true, convert values to transcripts per million
 #' @param outDest String - Path to directory where output file should be written
 #' @param verbose Logical - If true, reports name of each file as it's read
@@ -17,34 +17,30 @@
 #' @author Emma Myers
 #' @export
 
-write_expr = function(filenames, outPrefix, tpm = FALSE, outDest="./", verbose = TRUE) {
+write_expr = function(inFiles, outPrefix, tpm = FALSE, verbose=TRUE) {
 
     # Check arguments
-    outDest = dir_check(outDest)
+    if ( !all(file.exists(inFiles)) ) {
+        writeLines("Missing input files:")
+        writeLines(inFiles[which(!file.exists(inFiles))])
+        stop("Missing input file(s).  See above.")
+    }
 
-    # Define output file name
-    fOut = paste(outDest, outPrefix, sep="")
-    if (tpm) { fOut = paste(fOut, "_TPM", sep="") }
-    fOut = paste(fOut, ".csv", sep="")
-    writeLines(fOut)
+    # Define full output filename
+    outFile = outPrefix
+    if (tpm) { outFile = paste(outFile, "_TPM", sep="") }
+    outFile = paste(outFile, ".csv", sep="")
+    if (verbose) { writeLines(paste("Expression matrix will be saved to:", outFile, sep="\n")) }
 
     # Check if output file already exists
-    if ( !file_checks(fOut, shouldExist=FALSE, verbose=TRUE) ) {
+    if ( file.exists(outFile) ) {
         stop("File already exists.")
     }
 
-    # Check for nonexistent files
-    msgFiles = filenames[which(!file.exists(filenames))]
-    if (length(msgFiles) != 0) {
-        writeLines('The following files do not exist and will be ignored:')
-        writeLines(msgFiles)
-        filenames = filenames[which(file.exists(filenames))]
-    }
-
     # Read in the read counts
-    writeLines("Reading in counts. . .")
-    fcounts = read_fcounts(fileList, verbose=verbose)
-    writeLines("Done.")
+    if (verbose) { writeLines("Reading in counts. . .") }
+    fcounts = read_fcounts(inFiles, verbose=verbose)
+    if (verbose) { writeLines("Done.") }
 
     # Get expression values into exprMat
     exprMat = fcounts$Count
@@ -53,11 +49,9 @@ write_expr = function(filenames, outPrefix, tpm = FALSE, outDest="./", verbose =
     # Convert to TPM if requested
     if (tpm) { exprMat = counts_to_tpm(exprMat, geneLens) }
 
-    # Set matrix row and column names and write to csv
-    rownames(exprMat) = fcounts$Geneid
-    samplenames = sub("_fcounts.txt", "", fileList)
-    colnames(exprMat) = samplenames
-    write.csv(exprMat, file = fOut)
+    # Write csv
+    Geneid_Count = data.frame(fcounts$Geneid, fcounts$Count)
+    write.table( Geneid_Count, file=outFile, row.names=FALSE, col.names=c("Geneid", colnames(fcounts$Count)), sep="," )
 
 }
 

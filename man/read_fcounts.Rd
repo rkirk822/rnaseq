@@ -4,10 +4,10 @@
 \alias{read_fcounts}
 \title{Read in raw counts}
 \usage{
-read_fcounts(filenames, verbose = TRUE)
+read_fcounts(inFiles, verbose = TRUE)
 }
 \arguments{
-\item{filenames}{Character - List of featureCounts output files (not the ones that end in "summary" or "report")}
+\item{inFiles}{Character - List of featureCounts output files (not the ones that end in "summary" or "report")}
 
 \item{verbose}{Logical - If true, reports name of each file as it's read}
 }
@@ -16,9 +16,6 @@ Read counts from featureCounts output into a dataframe.
 }
 \details{
 Output dataframe has columns corresponding to featureCounts output files, and rows corresponding to features (usually genes).
-The column names of the output's Count field are the full filenames, so you might want to do something like:
-counts = read_fcounts(fileList)
-colnames(counts$Count) = gsub("_fcounts.txt", "", colnames(counts$Count))
 }
 \examples{
 example here

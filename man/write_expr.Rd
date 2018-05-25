@@ -4,19 +4,18 @@
 \alias{write_expr}
 \title{Write expression values to csv}
 \usage{
-write_expr(filenames, outPrefix, tpm = FALSE, outDest = "./",
-  verbose = TRUE)
+write_expr(inFiles, outPrefix, tpm = FALSE, verbose = TRUE)
 }
 \arguments{
-\item{filenames}{Character - List of featureCounts output files (not the ones that end in "summary" or "report")}
+\item{inFiles}{Character - List of featureCounts output files (not the ones that end in "summary" or "report")}
 
-\item{outPrefix}{String - Output filename (sans path) will be this followed by ".csv" or "_TPM.csv", if TPM=TRUE}
+\item{outPrefix}{String - Output filename will be this followed by ".csv" (or "_TPM.csv", if TPM=TRUE).  Include path if you don't want current directory.}
 
 \item{tpm}{Logical - If true, convert values to transcripts per million}
 
-\item{outDest}{String - Path to directory where output file should be written}
-
 \item{verbose}{Logical - If true, reports name of each file as it's read}
+
+\item{outDest}{String - Path to directory where output file should be written}
 }
 \description{
 Read counts from featureCounts output and write them to a csv file.  Gene-by-sample matrix.
