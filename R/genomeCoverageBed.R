@@ -5,7 +5,7 @@
 #' @param filenames Character - List of BAM files
 #' @param genomeSizeFile String - Filename (with path) to text file containing genome size information
 #' @param bedtoolsPath String - Path to bedtools executables
-#' @param samtoolsPath String - Path to samtools exectuables (usually it's installed in the home directory and you can leave it as ""
+#' @param samtoolsPath String - Path to samtools exectuables
 #' @param outDest String - Directory where bedgraph files should be written
 #' @param outSuffix String - will be appended to original filename
 #' @param norm Logical - whether to normalize read counts to RPM (requires BAM input)
@@ -15,9 +15,7 @@
 #' Requires bedtools and samtools to be installed.
 #' Requires tools package.
 #' Note that it's a bit faster with bed than bam input files.  But if you do "norm", you have to give it a BAM file, not a bed file.
-#' TIME:  On yasuimac, 2.5m for 600 MB bam file
-#'              4m for an 815 MB bam file
-#'              Slightly shorter starting from bed file (2 and 3m).
+#' TIME:  ~2.5m for 600 MB bam file; ~4m for an 815 MB bam file.  Slightly shorter starting from bed file (2 and 3m).
 #' IMPROVE:
 #' Make it time calculating scaling factors too.
 #' And give total time for each file and for all files.
@@ -26,7 +24,7 @@
 #' Or, for bam input:
 #' $ /opt/bedtools2/bin/genomeCoverageBed -g /path/to/genome_size.tab.txt -ibam samplename.bam -bg -split > samplename.gencov.bedgraph
 #' To normalize by reads per million:
-#' $ uniqueReads=$(samtools view -F 0x904 -c samplename.bam)
+#' $ uniqueReads=$(samtools view -F 0x904 -c samplename.bam)  # those flags in the samtools view command get the number of uniquely mapped reads in BAM
 #' $ /opt/bedtools2/bin/genomeCoverageBed -g /path/to/genome_size.tab.txt -ibam samplename.bam -bg -scale 1000000/uniqueReads > samplename.gencov.bedgraph
 #' @examples
 #' genomeCoverageBed('samplename.filtered.bed', '/path/to/genome_size.tab.txt', outSuffix = 'unscaled', bedtoolsPath='/opt/bedtools2/bin/')
@@ -67,8 +65,8 @@ genomeCoverageBed = function(filenames, genomeSizeFile, bedtoolsPath="/opt/bedto
             scalingFactor = 1
             if (norm) {
                 writeLines("Calculating scaling factor for normalization...", sep="")
-                readCount = alignment_counts(f, samtoolsPath)
-                writeLines(paste(readCount, "reads in sample..."), sep="")
+                readCount = count_alignments(f, samtoolsPath, what="primary")
+                writeLines(paste(readCount, "uniquely mapped reads in sample..."), sep="")
                 scalingFactor = 10^6 / readCount
                 writeLines("done.")
             }

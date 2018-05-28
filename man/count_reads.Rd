@@ -20,12 +20,13 @@ Given a list of fastq files, return an array of read counts.
 \details{
 If you use (unzipped!) fastqs, this function will call wc -l through the command line to get the number of reads in the file,
 and then divide by 4 to get the read count (fastqs include 4 lines for each read).
-TIME:  Roughly 30s per GB, if you look at the fastq file sizes.
+TIME:  About 1.5s / GB, if you look at the fastq file sizes.  That's on Smintheus.  Roughly 30s per GB, on yasuimac.
 }
 \examples{
-readCounts = count_reads(reportFiles)
-pdf("countsBar.pdf")
-barplot(readCounts/1000000, las=2, main="Total reads", cex.names = 0.5, names.arg=gsub("_mapped_Aligned.sortedByCoord.out.bam", "", bams), ylab="Millions")
+fastqFiles = list.files("NucSeq/trimmed", pattern=".fastq")
+readCounts = count_reads(paste("NucSeq/trimmed/", fastqFiles, sep=""))
+pdf("NucSeq_reads_per_sample_trimmed.pdf")
+barplot(readCounts/1000000, las=2, main="Nuc-seq reads per sample (trimmed files)", cex.names = 0.5, names.arg=gsub("_trimmed_m20_q20.fastq", "", fastqFiles), ylab="Millions")
 dev.off()
 }
 \author{

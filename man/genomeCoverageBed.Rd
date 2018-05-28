@@ -15,7 +15,7 @@ genomeCoverageBed(filenames, genomeSizeFile,
 
 \item{bedtoolsPath}{String - Path to bedtools executables}
 
-\item{samtoolsPath}{String - Path to samtools exectuables (usually it's installed in the home directory and you can leave it as ""}
+\item{samtoolsPath}{String - Path to samtools exectuables}
 
 \item{outDest}{String - Directory where bedgraph files should be written}
 
@@ -35,9 +35,7 @@ a bedgraph file with histogram of coverage values.
 Requires bedtools and samtools to be installed.
 Requires tools package.
 Note that it's a bit faster with bed than bam input files.  But if you do "norm", you have to give it a BAM file, not a bed file.
-TIME:  On yasuimac, 2.5m for 600 MB bam file
-             4m for an 815 MB bam file
-             Slightly shorter starting from bed file (2 and 3m).
+TIME:  ~2.5m for 600 MB bam file; ~4m for an 815 MB bam file.  Slightly shorter starting from bed file (2 and 3m).
 IMPROVE:
 Make it time calculating scaling factors too.
 And give total time for each file and for all files.
@@ -46,7 +44,7 @@ $ /opt/bedtools2/bin/genomeCoverageBed -g /path/to/genome_size.tab.txt -i sample
 Or, for bam input:
 $ /opt/bedtools2/bin/genomeCoverageBed -g /path/to/genome_size.tab.txt -ibam samplename.bam -bg -split > samplename.gencov.bedgraph
 To normalize by reads per million:
-$ uniqueReads=$(samtools view -F 0x904 -c samplename.bam)
+$ uniqueReads=$(samtools view -F 0x904 -c samplename.bam)  # those flags in the samtools view command get the number of uniquely mapped reads in BAM
 $ /opt/bedtools2/bin/genomeCoverageBed -g /path/to/genome_size.tab.txt -ibam samplename.bam -bg -scale 1000000/uniqueReads > samplename.gencov.bedgraph
 }
 \examples{

@@ -23,7 +23,7 @@ bedgraph_flip = function(inFiles, outDest="./", outSuffix="_flipped") {
         writeLines(inFiles[which(!file.exists(inFiles))])
         stop("Missing input file(s).  See above.")
     }
-    if ( isEmpty(inFiles) ) { stop("No input files given.") }
+    if ( length(inFiles)==0 ) { stop("No input files given.") }
 
     # Don't want it writing table with scientific notation
     options(scipen=999)

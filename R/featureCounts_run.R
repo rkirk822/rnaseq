@@ -13,11 +13,8 @@
 #' Command issued will be written to a text file, particularly so you can confirm the annotation file used (unless its filename gets changed).
 #' TIME:  1-3m per BAM.
 #' Example at the command line (if you want to play with the parameters while looking at just one file, this might be easiest):
-#' featureCounts -a $annotFile -O -o $outputFile $inputFile -T $nCores
-#' @examples
-#' annotFile=/Volumes/CodingClub1/STAR_stuff/annotations/mm10_refGene.gtf
-#' # For intronic read counts:
-#' annotFile=/Volumes/CodingClub1/RNAseq/Metadata/mm10_refSeq_introns_geneids.gtf
+#' annotFile=/Volumes/CodingClub1/RNAseq/Metadata/mm10_refGene.gtf # for intronic read counts, use mm10_refSeq_introns_geneids.gtf
+#' featureCounts -a $annotFile -o $outputFile $inputFile -T 8
 #' @author Emma Myers
 #' @export
 

@@ -24,9 +24,11 @@ and then giving this function the resulting summary files.
 TIME:
 }
 \examples{
-readCounts = count_features(summaryFiles)
-pdf("countsBar.pdf")
-barplot(readCounts/1000000, las=2, main="Total reads", cex.names = 0.5, names.arg=gsub("_mapped_Aligned.sortedByCoord.out.bam", "", bams), ylab="Millions")
+summaryFiles = list.files("NucSeq/counts/exonic_counts", pattern="summary")
+fCounts = count_features(paste("NucSeq/counts/exonic_counts/", summaryFiles, sep=""))
+assignedCounts = as.vector(fCounts[1,], mode="numeric")
+pdf("NucSeq_exonic_primary_read_counts.pdf")
+barplot(assignedCounts/1000000, las=2, main="Nuc-seq exonic primary reads", cex.names = 0.5, names.arg=gsub("_fcounts.txt.summary", "", summaryFiles), ylab="Millions")
 dev.off()
 }
 \author{
