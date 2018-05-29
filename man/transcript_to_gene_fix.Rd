@@ -16,7 +16,7 @@ Given a GTF file with transcript ids in the "gene_id" field and a file mapping t
 }
 \details{
 Use the transcript_to_gene_map function to create the mapFile input.
-TIME:  Most of it's the "Replacing transcript ids with gene ids in key-value field" part, which is ~15-20m.
+TIME:  Most of it's the "Replacing transcript ids with gene ids in key-value field" part, which is anywhere from 15-30m.
 }
 \examples{
 transcript_to_gene_fix("/Volumes/CodingClub1/RNAseq/Metadata/mm10_refSeq_introns.gtf", "/Volumes/CodingClub1/RNAseq/Metadata/RefSeq_id_map.csv")

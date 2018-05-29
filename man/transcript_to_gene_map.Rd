@@ -19,7 +19,7 @@ Given a GTF file with both gene ids and transcript ids, write a csv with gene id
 }
 \details{
 Note that gene ids (in the first column of the output file) will be repeated when associated with multiple transcript ids.
-TIME: A minute or so.
+TIME: A minute or two.
 }
 \examples{
 ids = transcript_to_gene_map("/Volumes/CodingClub1/RNAseq/Metadata/mm10_refGene.gtf", "/Volumes/CodingClub1/RNAseq/Metadata/RefSeq_id_map.csv")

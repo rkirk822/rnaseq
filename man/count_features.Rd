@@ -2,34 +2,23 @@
 % Please edit documentation in R/count_features.R
 \name{count_features}
 \alias{count_features}
-\title{Get read counts from featureCounts summary files}
+\title{Read in raw counts for genomic features}
 \usage{
 count_features(inFiles, verbose = TRUE)
 }
 \arguments{
-\item{inFiles}{Character - List of featureCounts output files}
+\item{inFiles}{Character - List of featureCounts output files (not the ones that end in "summary" or "report")}
 
-\item{verbose}{Logical - whether to report progress}
-}
-\value{
-Data frame - Columns correspond to input files and rows to read types
+\item{verbose}{Logical - If true, reports name of each file as it's read}
 }
 \description{
-Given a list of featureCounts summary files, return a dataframe of read counts broken down by type (assigned, unassigned due to multimapping, etc)
+Read counts from featureCounts output into a dataframe.
 }
 \details{
-Gets read counts per sample from the "summary.txt" files output by featureCounts.  This means you're getting counts for the features included
-in the annotation file given to featureCounts.  This is how to get specifically intronic read counts, by giving featureCounts a gtf with only introns
-and then giving this function the resulting summary files.
-TIME:
+Output dataframe has columns corresponding to featureCounts output files, and rows corresponding to features (usually genes).
 }
 \examples{
-summaryFiles = list.files("NucSeq/counts/exonic_counts", pattern="summary")
-fCounts = count_features(paste("NucSeq/counts/exonic_counts/", summaryFiles, sep=""))
-assignedCounts = as.vector(fCounts[1,], mode="numeric")
-pdf("NucSeq_exonic_primary_read_counts.pdf")
-barplot(assignedCounts/1000000, las=2, main="Nuc-seq exonic primary reads", cex.names = 0.5, names.arg=gsub("_fcounts.txt.summary", "", summaryFiles), ylab="Millions")
-dev.off()
+example here
 }
 \author{
 Emma Myers

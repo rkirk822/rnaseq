@@ -1,21 +1,11 @@
-#' Get read counts from featureCounts summary files
+#' Read in raw counts for genomic features
 #'
-#' Given a list of featureCounts summary files, return a dataframe of read counts broken down by type (assigned, unassigned due to multimapping, etc)
-#' @param inFiles Character - List of featureCounts output files
-#' @param verbose Logical - whether to report progress
-#' @return Data frame - Columns correspond to input files and rows to read types
-#' @details Gets read counts per sample from the "summary.txt" files output by featureCounts.  This means you're getting counts for the features included
-#' in the annotation file given to featureCounts.  This is how to get specifically intronic read counts, by giving featureCounts a gtf with only introns
-#' and then giving this function the resulting summary files.
-#' TIME:
-#'
+#' Read counts from featureCounts output into a dataframe.
+#' @param inFiles Character - List of featureCounts output files (not the ones that end in "summary" or "report")
+#' @param verbose Logical - If true, reports name of each file as it's read
+#' @details  Output dataframe has columns corresponding to featureCounts output files, and rows corresponding to features (usually genes).
 #' @examples
-#' summaryFiles = list.files("NucSeq/counts/exonic_counts", pattern="summary")
-#' fCounts = count_features(paste("NucSeq/counts/exonic_counts/", summaryFiles, sep=""))
-#' assignedCounts = as.vector(fCounts[1,], mode="numeric")
-#' pdf("NucSeq_exonic_primary_read_counts.pdf")
-#' barplot(assignedCounts/1000000, las=2, main="Nuc-seq exonic primary reads", cex.names = 0.5, names.arg=gsub("_fcounts.txt.summary", "", summaryFiles), ylab="Millions")
-#' dev.off()
+#' example here
 #' @author Emma Myers
 #' @export
 
@@ -28,25 +18,34 @@ count_features = function(inFiles, verbose = TRUE) {
         stop("Missing input file(s).  See above.")
     }
 
-    # Read in the first file
-    # There's probably a nicer way to do this, but this makes the dataframe end up the way I want it whereas initializing an empty one doesn't
-    if (verbose) {writeLines(paste("Reading", inFiles[1]))}
-    countSummaries = read.table(inFiles[1], header=TRUE, row.names=1)
+    # Read in the first file and rename last column
+    if (verbose) {writeLines(paste('Reading', inFiles[1]))}
+    fcounts = read.table(inFiles[1], header=TRUE)
+    names(fcounts)[7] = 'Count'
+    # Count field has to be dataframe instead of matrix, or having only one file will fuck it up
+    fcounts$Count = as.data.frame(fcounts$Count)
 
-    # If there are more files, read in the rest of them and concatenate
-    if (length(inFiles) > 1) {
+    # Read in the rest of the files
+    if ( length(inFiles) > 1 ) {
         for (f in inFiles[2:length(inFiles)]) {
-            if (verbose) {writeLines(paste("Reading", f))}
-            countSummaries = cbind(countSummaries, read.table(f, header=TRUE, row.names=1))
+            # Read into data frame and make sure all fields except Count match up
+            if (verbose) {writeLines(paste('Reading', f))}
+            nextCounts = read.table(f, header=TRUE)
+            names(nextCounts)[7] = 'Count'
+            if (any(fcounts$Geneid != nextCounts$Geneid)) {'Mismatched Geneid fields; skipping'; continue}
+            if (any(fcounts$Chr != nextCounts$Chr)) {'Mismatched Chr fields; skipping'; continue}
+            if (any(fcounts$Start != nextCounts$Start)) {'Mismatched Start fields; skipping'; continue}
+            if (any(fcounts$End != nextCounts$End)) {'Mismatched End fields; skipping'; continue}
+            if (any(fcounts$Strand != nextCounts$Strand)) {'Mismatched Strand fields; skipping'; continue}
+            if (any(fcounts$Length != nextCounts$Length)) {'Mismatched Length fields; skipping'; continue}
+            # Concatenate Count field
+            fcounts$Count = cbind(fcounts$Count, nextCounts$Count)
         }
     }
 
-    # Nicer column names than the full filenames that might include paths
-    names(countSummaries) = gsub(".summary", "", basename(inFiles))
-    # Get rid of "_fcounts.txt" in the names separately, because it's not automatically done by featureCounts and might not be there
-    names(countSummaries) = gsub("_fcounts.txt", "", names(countSummaries))
-
-    return(countSummaries)
+    # Use filenames (sans path) as column names
+    # (and if featureCounts output has been consistently named we can clean it up a little)
+    colnames(fcounts$Count) = gsub("_fcounts.txt", "", basename(inFiles))
+    return(fcounts)
 
 }
-

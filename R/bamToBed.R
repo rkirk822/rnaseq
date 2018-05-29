@@ -9,7 +9,7 @@
 #' Mitochondrial, unknown, and "random" reads should have been removed already (see sam_filter.R).
 #' If you give the output file a suffix with "outSuffix", you need to start it with a "_" or "." or
 #' whatever if you don't want it just smooshed onto the end of the input file name.
-#' Time:  For NucSeq data, ranged from ~2.5m for cb_p036_1 to ~14.5m for L4_RORb_1.
+#' TIME:  For NucSeq data, ranged from ~2.5m for cb_p036_1 to ~14.5m for L4_RORb_1.
 #' Example at the command line:
 #' /opt/bedtools2/bin/bamToBed -i samplename.bam > samplename.bed
 #' @examples
