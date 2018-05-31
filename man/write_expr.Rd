@@ -29,7 +29,7 @@ So if you used a file with all exons, it's the gene's exonic length; for introns
 setwd("counts_nucseq/intronic_counts/")
 fileList = list.files(pattern="_fcounts.txt") # note underscore prevents getting, e.g., "p200" included with "p2"
 fileList = fileList[ - which(regexpr('summary', fileList) > 0 ) ]
-write_expr(fileList, outPrefix="Nucseq_intronic", tpm=TRUE, outDest="tpm_nucseq")
+write_expr(fileList, outPrefix="tpm_nucseq/Nucseq_intronic", tpm=TRUE)
 }
 \author{
 Emma Myers

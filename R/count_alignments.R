@@ -1,6 +1,6 @@
 #' Get alignment counts from BAM files
 #'
-#' Given a list of BAM files, return an array of either unique (primary) alignments or all alignments that passed QC.
+#' Given a list of BAM files, return an array of either primary (most likely) alignments or all alignments that passed QC.
 #' @param inFiles Character - BAM file list
 #' @param samtoolsPath String - path to samtools directory
 #' @param what String - What type of reads to include
@@ -16,7 +16,7 @@
 #' @examples
 #' readCounts = count_alignments(bamFileNames)
 #' pdf("countsBar.pdf")
-#' barplot(readCounts/1000000, las=2, main="Uniquely mapped reads", cex.names = 0.5, names.arg=gsub("_mapped_Aligned.sortedByCoord.out.bam", "", bamFileNames), ylab="Millions")
+#' barplot(readCounts/1000000, las=2, main="Primary alignment counts", cex.names = 0.5, names.arg=gsub("_mapped_Aligned.sortedByCoord.out.bam", "", bamFileNames), ylab="Millions")
 #' dev.off()
 #' @author Emma Myers
 #' @export
@@ -36,7 +36,7 @@ count_alignments = function(inFiles, samtoolsPath="~/anaconda2/bin/", what="prim
         if (verbose) { writeLines("\nAll alignments that passed quality control will be counted (including those from a single multi-mapping read!") }
         args_except_file = c("view", "-f", "0", "-c")
     } else if (what == "primary") {
-        if (verbose) { writeLines("\nOnly primary alignments (no multi-mappers or chimeric reads) will be counted.") }
+        if (verbose) { writeLines("\nOnly primary alignments (most likely alignment for a given read) will be counted.") }
         args_except_file = c("view", "-F", "0x904", "-c")
     }
 

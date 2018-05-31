@@ -5,7 +5,11 @@
 #' @param verbose Logical - If true, reports name of each file as it's read
 #' @details  Output dataframe has columns corresponding to featureCounts output files, and rows corresponding to features (usually genes).
 #' @examples
-#' example here
+#' fcs = dir(paste(projectPath, "counts/exonic_counts/", sep=""), pattern="_fcounts.txt")
+#' fcs = fcs[ which(regexpr("summary", fcs) < 0) ]
+#' counts_nucseq_ex = count_features(paste(projectPath, "counts/exonic_counts/",fcs,sep=""))
+#' dim(counts_nucseq_ex)
+#' [1] 24746     7
 #' @author Emma Myers
 #' @export
 
@@ -20,7 +24,7 @@ count_features = function(inFiles, verbose = TRUE) {
 
     # Read in the first file and rename last column
     if (verbose) {writeLines(paste('Reading', inFiles[1]))}
-    fcounts = read.table(inFiles[1], header=TRUE)
+    fcounts = read.table(inFiles[1], header=TRUE, stringsAsFactors=FALSE)
     names(fcounts)[7] = 'Count'
     # Count field has to be dataframe instead of matrix, or having only one file will fuck it up
     fcounts$Count = as.data.frame(fcounts$Count)
@@ -30,7 +34,7 @@ count_features = function(inFiles, verbose = TRUE) {
         for (f in inFiles[2:length(inFiles)]) {
             # Read into data frame and make sure all fields except Count match up
             if (verbose) {writeLines(paste('Reading', f))}
-            nextCounts = read.table(f, header=TRUE)
+            nextCounts = read.table(f, header=TRUE, stringsAsFactors=FALSE)
             names(nextCounts)[7] = 'Count'
             if (any(fcounts$Geneid != nextCounts$Geneid)) {'Mismatched Geneid fields; skipping'; continue}
             if (any(fcounts$Chr != nextCounts$Chr)) {'Mismatched Chr fields; skipping'; continue}
@@ -42,6 +46,9 @@ count_features = function(inFiles, verbose = TRUE) {
             fcounts$Count = cbind(fcounts$Count, nextCounts$Count)
         }
     }
+
+    # Give the expression matrix row names
+    rownames(fcounts$Count) = fcounts$Geneid
 
     # Use filenames (sans path) as column names
     # (and if featureCounts output has been consistently named we can clean it up a little)

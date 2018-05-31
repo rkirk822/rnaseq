@@ -18,7 +18,11 @@ Read counts from featureCounts output into a dataframe.
 Output dataframe has columns corresponding to featureCounts output files, and rows corresponding to features (usually genes).
 }
 \examples{
-example here
+fcs = dir(paste(projectPath, "counts/exonic_counts/", sep=""), pattern="_fcounts.txt")
+fcs = fcs[ which(regexpr("summary", fcs) < 0) ]
+counts_nucseq_ex = count_features(paste(projectPath, "counts/exonic_counts/",fcs,sep=""))
+dim(counts_nucseq_ex)
+[1] 24746     7
 }
 \author{
 Emma Myers

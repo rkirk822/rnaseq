@@ -2,7 +2,7 @@
 #'
 #' Read counts from featureCounts output and write them to a csv file.  Gene-by-sample matrix.
 #' @param inFiles Character - List of featureCounts output files (not the ones that end in "summary" or "report")
-#' @param outPrefix String - Output filename will be this followed by ".csv" (or "_TPM.csv", if TPM=TRUE).  Include path if you don't want current directory.
+#' @param outFileNamePrefix String - Output filename will be this followed by ".csv" (or "_TPM.csv", if TPM=TRUE).  Include path if you don't want current directory.
 #' @param tpm Logical - If true, convert values to transcripts per million
 #' @param outDest String - Path to directory where output file should be written
 #' @param verbose Logical - If true, reports name of each file as it's read
@@ -13,11 +13,11 @@
 #' setwd("counts_nucseq/intronic_counts/")
 #' fileList = list.files(pattern="_fcounts.txt") # note underscore prevents getting, e.g., "p200" included with "p2"
 #' fileList = fileList[ - which(regexpr('summary', fileList) > 0 ) ]
-#' write_expr(fileList, outPrefix="Nucseq_intronic", tpm=TRUE, outDest="tpm_nucseq")
+#' write_expr(fileList, outPrefix="tpm_nucseq/Nucseq_intronic", tpm=TRUE)
 #' @author Emma Myers
 #' @export
 
-write_expr = function(inFiles, outPrefix, tpm = FALSE, verbose=TRUE) {
+write_expr = function(inFiles, outFileNamePrefix, tpm = FALSE, verbose=TRUE) {
 
     # Check arguments
     if ( !all(file.exists(inFiles)) ) {
@@ -27,7 +27,7 @@ write_expr = function(inFiles, outPrefix, tpm = FALSE, verbose=TRUE) {
     }
 
     # Define full output filename
-    outFile = outPrefix
+    outFile = outFileNamePrefix
     if (tpm) { outFile = paste(outFile, "_TPM", sep="") }
     outFile = paste(outFile, ".csv", sep="")
     if (verbose) { writeLines(paste("Expression matrix will be saved to:", outFile, sep="\n")) }
@@ -39,10 +39,10 @@ write_expr = function(inFiles, outPrefix, tpm = FALSE, verbose=TRUE) {
 
     # Read in the read counts
     if (verbose) { writeLines("Reading in counts. . .") }
-    fcounts = read_fcounts(inFiles, verbose=verbose)
+    fcounts = count_features(inFiles, verbose=verbose)
     if (verbose) { writeLines("Done.") }
 
-    # Get expression values into exprMat
+    # Get expression values into exprMat (distinct from Count, which we may or may not be transforming)
     exprMat = fcounts$Count
     geneLens = fcounts$Length
 
@@ -50,8 +50,7 @@ write_expr = function(inFiles, outPrefix, tpm = FALSE, verbose=TRUE) {
     if (tpm) { exprMat = counts_to_tpm(exprMat, geneLens) }
 
     # Write csv
-    Geneid_Count = data.frame(fcounts$Geneid, fcounts$Count)
-    write.table( Geneid_Count, file=outFile, row.names=FALSE, col.names=c("Geneid", colnames(fcounts$Count)), sep="," )
+    write.csv(exprMat, file=outFile)
 
 }
 
