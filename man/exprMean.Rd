@@ -4,7 +4,7 @@
 \alias{exprMean}
 \title{Mean expression heatmaps}
 \usage{
-exprMean(exprDataFrame, genes = NULL, samples = NULL, L2 = TRUE,
+exprMean(exprDataFrame, genes = NULL, samples = NULL, L2 = FALSE,
   ylabSize = 8, figHeightPerGene = 20, figWidth = 200,
   colorsPlot = colorRamp(c("turquoise1", "magenta")), ncolors = 5,
   plotTitle = NULL, minVal = NULL, maxVal = NULL, fileOut = NULL)

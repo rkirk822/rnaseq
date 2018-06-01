@@ -30,7 +30,7 @@
 #' @author Emma Myers
 #' @export
 
-exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE, scaleGenes=TRUE, scaleByGroup=NULL,
+exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=FALSE, scaleGenes=FALSE, scaleByGroup=NULL,
                 ylabSize=8, figHeightPerGene=20, figWidth = 300, colorsPlot = colorRamp(c("yellow", "red")), ncolors=5,
                 plotTitle="Expression heatmap", minVal=NULL, maxVal=NULL, fileOut=NULL) {
 
@@ -73,9 +73,7 @@ exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE, scaleGe
         } else {
             exprForPlot = exprForPlot - rowMeans(exprForPlot[,scaleByGroup])
         }
-    } else {
-        if (!scaleGenes) { stop("You gave me a group of samples to use in scaling expression, but scaleGenes is FALSE.") }
-    }
+    } else { if (!is.null(scaleByGroup)) {stop("You gave me a group of samples to scale by, but scaleGenes=FALSE.  You want to scale within-gene or not?")} }
 
     # Vertically flip for heatmap
     exprForPlot = apply(exprForPlot, 2, rev)

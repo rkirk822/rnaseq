@@ -22,7 +22,7 @@ count_alignments(inFiles, samtoolsPath = "~/anaconda2/bin/",
 Numeric vector? - Alignment count for each BAM
 }
 \description{
-Given a list of BAM files, return an array of either unique (primary) alignments or all alignments that passed QC.
+Given a list of BAM files, return an array of either primary (most likely) alignments or all alignments that passed QC.
 }
 \details{
 Might make sense to give it an option to include, say, multi-mapped alignments.
@@ -35,7 +35,7 @@ TIME:  ~1m / BAM.
 \examples{
 readCounts = count_alignments(bamFileNames)
 pdf("countsBar.pdf")
-barplot(readCounts/1000000, las=2, main="Uniquely mapped reads", cex.names = 0.5, names.arg=gsub("_mapped_Aligned.sortedByCoord.out.bam", "", bamFileNames), ylab="Millions")
+barplot(readCounts/1000000, las=2, main="Primary alignment counts", cex.names = 0.5, names.arg=gsub("_mapped_Aligned.sortedByCoord.out.bam", "", bamFileNames), ylab="Millions")
 dev.off()
 }
 \author{

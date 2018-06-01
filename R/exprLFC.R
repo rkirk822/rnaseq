@@ -91,8 +91,8 @@ exprLFC = function(exprDataFrame, sampleGroups, genes=NULL,
     ### Making the plot #######################################################
     # Make plotly object
     lfcPlotlyObj = plotly::plot_ly(z = cbind(lfc, lfc), x = rep('.', times=2), y = names(lfc),
-                    type='heatmap', colors = colorsPlot, zmin = minVal, zmax = maxVal,
-                    height=figHeightThis, width = figWidth)
+                    type = 'heatmap', colors = colorsPlot, zmin = minVal, zmax = maxVal,
+                    height = figHeightThis, width = figWidth)
     # Set some layout stuff
     lfcPlotlyObj = plotly::layout(lfcPlotlyObj,
                         yaxis = list(tickfont = list(size = ylabSize, ticklen = 0)),

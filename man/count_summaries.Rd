@@ -28,7 +28,7 @@ summaryFiles = list.files("NucSeq/counts/exonic_counts", pattern="summary")
 fCounts = count_summaries(paste("NucSeq/counts/exonic_counts/", summaryFiles, sep=""))
 assignedCounts = as.vector(fCounts[1,], mode="numeric")
 pdf("NucSeq_assigned_reads_exonic.pdf")
-barplot(assignedCounts/1000000, las=2, main="Nuc-seq exonic primary reads", cex.names = 0.5, names.arg=gsub("_fcounts.txt.summary", "", summaryFiles), ylab="Millions")
+barplot(assignedCounts/10^6, las=2, main="Nuc-seq exonic assigned reads", cex.names = 0.5, names.arg=gsub("_fcounts.txt.summary", "", summaryFiles), ylab="Millions")
 dev.off()
 }
 \author{

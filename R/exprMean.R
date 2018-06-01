@@ -23,7 +23,7 @@
 #' @author Emma Myers
 #' @export
 
-exprMean = function(exprDataFrame, genes=NULL, samples=NULL, L2=TRUE,
+exprMean = function(exprDataFrame, genes=NULL, samples=NULL, L2=FALSE,
                 ylabSize=8, figHeightPerGene=20, figWidth = 200,
                 colorsPlot = colorRamp(c("turquoise1", "magenta")),
                 ncolors=5, plotTitle=NULL, minVal=NULL, maxVal=NULL, fileOut=NULL) {

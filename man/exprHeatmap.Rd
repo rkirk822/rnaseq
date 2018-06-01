@@ -4,8 +4,8 @@
 \alias{exprHeatmap}
 \title{Expression heatmaps}
 \usage{
-exprHeatmap(exprDataFrame, genes = NULL, samples = NULL, L2 = TRUE,
-  scaleGenes = TRUE, scaleByGroup = NULL, ylabSize = 8,
+exprHeatmap(exprDataFrame, genes = NULL, samples = NULL, L2 = FALSE,
+  scaleGenes = FALSE, scaleByGroup = NULL, ylabSize = 8,
   figHeightPerGene = 20, figWidth = 300,
   colorsPlot = colorRamp(c("yellow", "red")), ncolors = 5,
   plotTitle = "Expression heatmap", minVal = NULL, maxVal = NULL,
