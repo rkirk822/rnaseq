@@ -39,7 +39,7 @@
 #' @export
 
 
-exprLFC = function(exprDataFrame, sampleGroups, genes=NULL,
+exprLFC = function(exprDataFrame, sampleGroups, genes=NULL, absVal=FALSE,
                 ylabSize=8, figHeightPerGene=20, figWidth = 200,
                 colorsPlot = colorRamp(c("blue", "green")), ncolors=5,
                 plotTitle="Log2 FC", minVal=NULL, maxVal=NULL, fileOut=NULL,
@@ -72,8 +72,11 @@ exprLFC = function(exprDataFrame, sampleGroups, genes=NULL,
 
     ### Do some transformations ###############################################
 
-    # Get absolute value and vertically flip for heatmap
-    lfc = rev(abs(lfc))
+    # Get absolute value if requested
+    if (absVal) { lfc = abs(lfc) }
+
+    # Vertically flip for heatmap
+    lfc = rev(lfc)
 
     ### Dimensions and colorscale stuff ######################################
     figHeightThis = figHeightPerGene*length(lfc)

@@ -6,8 +6,8 @@
 \usage{
 featureCounts_run(inFiles, annotFile,
   fcPath = "/opt/subread-1.6.0-MacOSX-x86_64/bin/", outDest = "./",
-  outSuffix = "", runThreadN = 1, multimappers = FALSE,
-  dispToText = FALSE)
+  outSuffix = "", runThreadN = 1, pairedEnd = FALSE,
+  annotFormat = "GTF", multimappers = FALSE, dispToText = FALSE)
 }
 \arguments{
 \item{inFiles}{Character - BAM or SAM file list}
@@ -22,6 +22,10 @@ featureCounts_run(inFiles, annotFile,
 
 \item{runThreadN}{Numeric - How many cores to use}
 
+\item{pairedEnd}{Logical - Whether data is paired-end}
+
+\item{annotFormat}{String - "GTF" or "SAF".  Format of annotation file.}
+
 \item{multimappers}{Logical - Whether to count multi-mapping reads.  All reported alignments will be counted, using the 'NH' tag in the BAMs/SAMs.}
 
 \item{dispToText}{Logical - Whether to send messages that featureCounts normally displays to the screen, to a text file instead}
@@ -32,7 +36,7 @@ Get raw counts of reads mapped to specified genomic features using featureCount 
 \details{
 Take a list of SAM or BAM files, and get counts of reads mapped to genomic features in specified annotations file.
 Command issued will be written to a text file, particularly so you can confirm the annotation file used (unless its filename gets changed).
-TIME:  1-3m per BAM.
+TIME:  1-3m per BAM.  Paired-end data is significantly longer.  3-9m on small RNA data when features are ATAC peaks, so probably longer for larger files when features are all exons or all introns
 Example at the command line (if you want to play with the parameters while looking at just one file, this might be easiest):
 annotFile=/Volumes/CodingClub1/RNAseq/Metadata/mm10_refGene.gtf # for intronic read counts, use mm10_refSeq_introns_geneids.gtf
 featureCounts -a $annotFile -o $outputFile $inputFile -T 8

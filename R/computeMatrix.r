@@ -32,6 +32,7 @@ computeMatrix = function(inFiles, regionsFiles, deeptoolsPath="", outDest="./", 
         writeLines(inFiles[which(!file.exists(inFiles))])
         stop("Missing input file(s).  See above.")
     }
+
     if (! deeptoolsPath == "") {deeptoolsPath = dir_check(deeptoolsPath)}
     outDest = dir_check(outDest)
     if ( ! all(file.exists(regionsFiles)) ) { stop("One or more of the specified regions files do not exist.") }
@@ -42,8 +43,8 @@ computeMatrix = function(inFiles, regionsFiles, deeptoolsPath="", outDest="./", 
         writeLines(paste("\nProcessing file:", f))
 
         # Define arguments to the computeMatrix command
-        fOut = paste(outDest, sub(file_ext(f), paste(outSuffix, "mat.gz", sep=""), basename(f)), sep="")
-        arguments = c("scale-regions", "-S", b, "-R", paste(regionsFiles, collapse=" "),
+        fOut = paste(outDest, sub(tools::file_ext(f), paste(outSuffix, "mat.gz", sep=""), basename(f)), sep="")
+        arguments = c("scale-regions", "-S", f, "-R", paste(regionsFiles, collapse=" "),
                       "-b", upstream, "-a", downstream,
                       "--regionBodyLength", regionBodyLength, "--binSize", binSize,
                       "-o", fOut, "-p", nProcessors)
@@ -67,7 +68,7 @@ computeMatrix = function(inFiles, regionsFiles, deeptoolsPath="", outDest="./", 
             system2(paste(deeptoolsPath, "computeMatrix", sep=""), args = arguments, stdout = fOut, stderr = fDisp)
             tElapsed = proc.time()[3] - tStart
             writeLines(paste("done (", round(tElapsed/60, digits=2), "m).", sep=""))
-            writeLines(paste("Done with file.  See", fDist, "for messages displayed by computeMatrix."))
+            writeLines(paste("Done with file.  See", fDisp, "for messages displayed by computeMatrix."))
         }
 
     }

@@ -4,10 +4,11 @@
 \alias{exprLFC}
 \title{Log2 fold change heatmap}
 \usage{
-exprLFC(exprDataFrame, sampleGroups, genes = NULL, ylabSize = 8,
-  figHeightPerGene = 20, figWidth = 200, colorsPlot = colorRamp(c("blue",
-  "green")), ncolors = 5, plotTitle = "Log2 FC", minVal = NULL,
-  maxVal = NULL, fileOut = NULL, addVal = 0.1)
+exprLFC(exprDataFrame, sampleGroups, genes = NULL, absVal = FALSE,
+  ylabSize = 8, figHeightPerGene = 20, figWidth = 200,
+  colorsPlot = colorRamp(c("blue", "green")), ncolors = 5,
+  plotTitle = "Log2 FC", minVal = NULL, maxVal = NULL, fileOut = NULL,
+  addVal = 0.1)
 }
 \arguments{
 \item{exprDataFrame}{Data frame - Gene x sample expression values (counts, tpm, whatever)}

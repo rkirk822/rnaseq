@@ -18,9 +18,12 @@
 #' @param fileOut String - If given, save png to with this filename
 #' @return Plotly object
 #' @details Given a gene-by-sample dataframe with expression values, and (optionally) a list of the genes and
-#' samples you want included, make an expression heatmap using plotly.
-#' Note that, probably because I'm not set up to do the paying thing, some stuff doesn't get
-#' incorporated into the output png.
+#' samples you want included, make an expression heatmap using plotly.  Note that, probably because I'm not set
+#' up to do the paying thing, some stuff doesn't get incorporated into the output png.
+#' Within-gene scaling:  If TRUE, the default scaling is to scale each gene's alues so they fall within 0 and 1.
+#' If TRUE and you also give this function a scaleByGroup value (a set of column indexes in exprDataFrame), within-gene
+#' scaling will instead be done by taking the gene's mean value for that group of samples and subtracting that from its
+#' value for all samples.  Make scaleByGroup be the indexes of control samples to convey a sense of effect size.
 #' @examples
 #' exprData = read.table("Rorb_p2_TPM.csv", header=TRUE, row.names=1, sep=",")
 #' colnames(exprDataFrame) = gsub("BF_RORb", "", colnames(exprDataFrame))
