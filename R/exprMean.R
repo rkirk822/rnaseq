@@ -6,7 +6,7 @@
 #' @param genes Character - Gene symbols that appear as row names in exprDataFrame
 #' @param samples Character - Sample names that appear as column names in exprDataFrame
 #' @param L2 Logical - Whether to take log2 of values
-#' @param ylabSize Numeric - Font size for gene symbols
+#' @param yticklabSize Numeric - Font size for gene symbols
 #' @param figHeightPerGene Numeric -
 #' @param figWidth Numeric -
 #' @param colorsPlot Color ramp -
@@ -24,7 +24,7 @@
 #' @export
 
 exprMean = function(exprDataFrame, genes=NULL, samples=NULL, L2=FALSE,
-                ylabSize=8, figHeightPerGene=20, figWidth = 200,
+                yticklabSize=8, figHeightPerGene=20, figWidth = 200,
                 colorsPlot = colorRamp(c("turquoise1", "magenta")),
                 ncolors=5, plotTitle=NULL, minVal=NULL, maxVal=NULL, fileOut=NULL) {
 
@@ -83,7 +83,7 @@ exprMean = function(exprDataFrame, genes=NULL, samples=NULL, L2=FALSE,
         type='heatmap', colors = colorsPlot, height=figHeightThis, width = figWidth)
     # Set some layout stuff
     meanPlotlyObj = plotly::layout(meanPlotlyObj,
-                           yaxis = list(tickfont = list(size = ylabSize, ticklen = 0)),
+                           yaxis = list(tickfont = list(size = yticklabSize, ticklen = 0)),
                            xaxis = list(ticklen = 0),
                            title = plotTitle)
 

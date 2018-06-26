@@ -4,10 +4,11 @@
 #' Needs plotly
 #' @param exprDataFrame Data frame - Gene x sample expression values (counts, tpm, whatever)
 #' @param genes Character - Gene symbols that appear as row names in exprDataFrame
-#' @param L2 Logical - Whether to take log2 of values
+#' @param L2 Logical - Whether to take log2 of values.  Pseudocount of 1 is added.
 #' @param scaleGenes Logical - Whether to scale values within-gene
 #' @param scaleByGroup Vector? - Indexes (in exprDataFrame) of samples whose mean profile will be subtracted from each value
-#' @param ylabSize Numeric - Font size for gene symbols
+#' @param yticklabSize Numeric - Font size for gene symbols
+#' @param yticklabColor Character vector
 #' @param figHeightPerGene Numeric -
 #' @param figWidth Numeric -
 #' @param colorsPlot Color ramp -
@@ -20,6 +21,9 @@
 #' @details Given a gene-by-sample dataframe with expression values, and (optionally) a list of the genes and
 #' samples you want included, make an expression heatmap using plotly.  Note that, probably because I'm not set
 #' up to do the paying thing, some stuff doesn't get incorporated into the output png.
+#' Log2:  If TRUE, a pseudocount of 1 is added to all values.  This means that genes with an original count of 0 get
+#' a log2(count) of 0 rather than an infinite value, and there are no negative values because there are no genes with
+#' count < 1.
 #' Within-gene scaling:  If TRUE, the default scaling is to scale each gene's alues so they fall within 0 and 1.
 #' If TRUE and you also give this function a scaleByGroup value (a set of column indexes in exprDataFrame), within-gene
 #' scaling will instead be done by taking the gene's mean value for that group of samples and subtracting that from its
@@ -34,7 +38,7 @@
 #' @export
 
 exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=FALSE, scaleGenes=FALSE, scaleByGroup=NULL,
-                ylabSize=8, figHeightPerGene=20, figWidth = 300, colorsPlot = colorRamp(c("yellow", "red")), ncolors=5,
+                yticklabSize=8, yticklabColor=NULL, figHeightPerGene=20, figWidth = 300, colorsPlot = colorRamp(c("yellow", "red")), ncolors=5,
                 plotTitle="Expression heatmap", minVal=NULL, maxVal=NULL, fileOut=NULL) {
 
     ### Check inputs ######################################################
@@ -59,14 +63,11 @@ exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=FALSE, scaleG
     exprSubset = exprDataFrame[genes, samples] # hang onto these values
     exprForPlot = exprSubset # we're gonna transform these for the plot
 
-
     ### Do some transformations ##############################################
     # Take log2 if requested
     if ( L2 ) {
         exprTemp = exprForPlot
-        exprForPlot = log2(exprForPlot)
-        # zeros where expression was zero
-        exprForPlot[exprTemp == 0] = 0
+        exprForPlot = log2(exprForPlot + 1)
     }
     if ( scaleGenes ) {
         # If we're scaling the genes but weren't given control samples, scale to 0-to-1 range
@@ -104,7 +105,7 @@ exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=FALSE, scaleG
 
     # Set some layout stuff
     exprPlotlyObj = plotly::layout(exprPlotlyObj,
-                           yaxis = list(tickfont = list(size = ylabSize, tickvals = 1:dim(exprForPlot)[2]), ticklen = 0),
+                           yaxis = list(ticklen = 0, tickfont = list(size = yticklabSize, tickvals = 1:dim(exprForPlot)[2], color = yticklabColor)),
                            xaxis = list(ticklen = 0),
                            title = plotTitle)
 
@@ -122,9 +123,5 @@ exprHeatmap = function(exprDataFrame, genes=NULL, samples=NULL, L2=FALSE, scaleG
     }
 
     return(exprPlotlyObj)
-
-# # These don't retain stuff you do with layout():
-# htmlwidgets::saveWidget(as_widget(exprPlotlyObj), "/Users/nelsonlab/Documents/exprTest.html")
-# export(p=exprPlotlyObj, file="/Users/nelsonlab/Documents/exprTest.pdf")
 
 }

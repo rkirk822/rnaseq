@@ -5,7 +5,7 @@
 \title{Mean expression heatmaps}
 \usage{
 exprMean(exprDataFrame, genes = NULL, samples = NULL, L2 = FALSE,
-  ylabSize = 8, figHeightPerGene = 20, figWidth = 200,
+  yticklabSize = 8, figHeightPerGene = 20, figWidth = 200,
   colorsPlot = colorRamp(c("turquoise1", "magenta")), ncolors = 5,
   plotTitle = NULL, minVal = NULL, maxVal = NULL, fileOut = NULL)
 }
@@ -18,7 +18,7 @@ exprMean(exprDataFrame, genes = NULL, samples = NULL, L2 = FALSE,
 
 \item{L2}{Logical - Whether to take log2 of values}
 
-\item{ylabSize}{Numeric - Font size for gene symbols}
+\item{yticklabSize}{Numeric - Font size for gene symbols}
 
 \item{figHeightPerGene}{Numeric -}
 

@@ -5,10 +5,9 @@
 \title{Log2 fold change heatmap}
 \usage{
 exprLFC(exprDataFrame, sampleGroups, genes = NULL, absVal = FALSE,
-  ylabSize = 8, figHeightPerGene = 20, figWidth = 200,
+  yticklabSize = 8, figHeightPerGene = 20, figWidth = 200,
   colorsPlot = colorRamp(c("blue", "green")), ncolors = 5,
-  plotTitle = "Log2 FC", minVal = NULL, maxVal = NULL, fileOut = NULL,
-  addVal = 0.1)
+  plotTitle = "Log2 FC", minVal = NULL, maxVal = NULL, fileOut = NULL)
 }
 \arguments{
 \item{exprDataFrame}{Data frame - Gene x sample expression values (counts, tpm, whatever)}
@@ -17,7 +16,7 @@ exprLFC(exprDataFrame, sampleGroups, genes = NULL, absVal = FALSE,
 
 \item{genes}{Character? -}
 
-\item{ylabSize}{Numeric - Font size for gene symbols}
+\item{yticklabSize}{Numeric - Font size for gene symbols}
 
 \item{figHeightPerGene}{Numeric -}
 
@@ -34,8 +33,6 @@ exprLFC(exprDataFrame, sampleGroups, genes = NULL, absVal = FALSE,
 \item{maxVal}{Numeric -}
 
 \item{fileOut}{String - If given, save png to with this filename}
-
-\item{addVal}{Numeric - Very small value added to expression values to avoid taking log2 of 0}
 }
 \value{
 Plotly object
@@ -53,9 +50,8 @@ incorporated into the output png.
 Fold change will be group2 / group1 (so if you put a control condition in group 1, the sign
 will be positive if expression increased in the treatment condition, not that that changes
 anything in the heatmap since we'll show abs(LFC)).
-The value of addVal will be added to all expression levels to avoid dividing by zero or taking
-the log of zero.  Default is 0.1 because I looked at one sample's distribution of TPM (excluding
-zero values) to see what constitutes a tiny amount, and 0.1 was under the 3rd percentile.
+A pseudocount of 1 is added to all values before taking the means of the two conditions.  This means that
+genes with an original count of 0 get a log2(count) of 0 rather than an infinite value.
 }
 \examples{
 exprData = read.table("Rorb_p2_TPM.csv", header=TRUE, row.names=1, sep=",")

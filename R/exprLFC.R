@@ -5,7 +5,7 @@
 #' @param exprDataFrame Data frame - Gene x sample expression values (counts, tpm, whatever)
 #' @param sampleGroups List - Two elements, each containing indices of samples in exprDataFrame
 #' @param genes Character? -
-#' @param ylabSize Numeric - Font size for gene symbols
+#' @param yticklabSize Numeric - Font size for gene symbols
 #' @param figHeightPerGene Numeric -
 #' @param figWidth Numeric -
 #' @param colorsPlot Color ramp -
@@ -14,7 +14,6 @@
 #' @param minVal Numeric -
 #' @param maxVal Numeric -
 #' @param fileOut String - If given, save png to with this filename
-#' @param addVal Numeric - Very small value added to expression values to avoid taking log2 of 0
 #' @return Plotly object
 #' @details  Given a gene-by-sample dataframe with expression values, a list with two vectors indicating
 #' samples in each of two groups, and (optionally) a list of the genes you want included,
@@ -24,9 +23,8 @@
 #' Fold change will be group2 / group1 (so if you put a control condition in group 1, the sign
 #' will be positive if expression increased in the treatment condition, not that that changes
 #' anything in the heatmap since we'll show abs(LFC)).
-#' The value of addVal will be added to all expression levels to avoid dividing by zero or taking
-#' the log of zero.  Default is 0.1 because I looked at one sample's distribution of TPM (excluding
-#' zero values) to see what constitutes a tiny amount, and 0.1 was under the 3rd percentile.
+#' A pseudocount of 1 is added to all values before taking the means of the two conditions.  This means that
+#' genes with an original count of 0 get a log2(count) of 0 rather than an infinite value.
 #' @examples
 #' exprData = read.table("Rorb_p2_TPM.csv", header=TRUE, row.names=1, sep=",")
 #' colnames(exprDataFrame) = gsub("BF_RORb", "", colnames(exprDataFrame))
@@ -40,10 +38,9 @@
 
 
 exprLFC = function(exprDataFrame, sampleGroups, genes=NULL, absVal=FALSE,
-                ylabSize=8, figHeightPerGene=20, figWidth = 200,
+                yticklabSize=8, figHeightPerGene=20, figWidth = 200,
                 colorsPlot = colorRamp(c("blue", "green")), ncolors=5,
-                plotTitle="Log2 FC", minVal=NULL, maxVal=NULL, fileOut=NULL,
-                addVal=0.1) {
+                plotTitle="Log2 FC", minVal=NULL, maxVal=NULL, fileOut=NULL) {
 
     ### Check inputs ######################################################
 
@@ -63,8 +60,7 @@ exprLFC = function(exprDataFrame, sampleGroups, genes=NULL, absVal=FALSE,
 
 
     ### Get LFCs #############################################################
-    # avoid dividing by or taking log of zero
-    exprDataFrame = exprDataFrame + addVal
+    exprDataFrame = exprDataFrame + 1 # add pseudocount to avoid log2 of 0
     groupMeans = vector("list", 2)
     groupMeans[[1]] = rowMeans(exprDataFrame[genes, sampleGroups[[1]]])
     groupMeans[[2]] = rowMeans(exprDataFrame[genes, sampleGroups[[2]]])
@@ -98,7 +94,7 @@ exprLFC = function(exprDataFrame, sampleGroups, genes=NULL, absVal=FALSE,
                     height = figHeightThis, width = figWidth)
     # Set some layout stuff
     lfcPlotlyObj = plotly::layout(lfcPlotlyObj,
-                        yaxis = list(tickfont = list(size = ylabSize, ticklen = 0)),
+                        yaxis = list(tickfont = list(size = yticklabSize, ticklen = 0)),
                         xaxis = list(ticklen = 0),
                         title = plotTitle)
 

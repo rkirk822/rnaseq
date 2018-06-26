@@ -5,8 +5,8 @@
 \title{Expression heatmaps}
 \usage{
 exprHeatmap(exprDataFrame, genes = NULL, samples = NULL, L2 = FALSE,
-  scaleGenes = FALSE, scaleByGroup = NULL, ylabSize = 8,
-  figHeightPerGene = 20, figWidth = 300,
+  scaleGenes = FALSE, scaleByGroup = NULL, yticklabSize = 8,
+  yticklabColor = NULL, figHeightPerGene = 20, figWidth = 300,
   colorsPlot = colorRamp(c("yellow", "red")), ncolors = 5,
   plotTitle = "Expression heatmap", minVal = NULL, maxVal = NULL,
   fileOut = NULL)
@@ -16,13 +16,15 @@ exprHeatmap(exprDataFrame, genes = NULL, samples = NULL, L2 = FALSE,
 
 \item{genes}{Character - Gene symbols that appear as row names in exprDataFrame}
 
-\item{L2}{Logical - Whether to take log2 of values}
+\item{L2}{Logical - Whether to take log2 of values.  Pseudocount of 1 is added.}
 
 \item{scaleGenes}{Logical - Whether to scale values within-gene}
 
 \item{scaleByGroup}{Vector? - Indexes (in exprDataFrame) of samples whose mean profile will be subtracted from each value}
 
-\item{ylabSize}{Numeric - Font size for gene symbols}
+\item{yticklabSize}{Numeric - Font size for gene symbols}
+
+\item{yticklabColor}{Character vector}
 
 \item{figHeightPerGene}{Numeric -}
 
@@ -51,6 +53,9 @@ Needs plotly
 Given a gene-by-sample dataframe with expression values, and (optionally) a list of the genes and
 samples you want included, make an expression heatmap using plotly.  Note that, probably because I'm not set
 up to do the paying thing, some stuff doesn't get incorporated into the output png.
+Log2:  If TRUE, a pseudocount of 1 is added to all values.  This means that genes with an original count of 0 get
+a log2(count) of 0 rather than an infinite value, and there are no negative values because there are no genes with
+count < 1.
 Within-gene scaling:  If TRUE, the default scaling is to scale each gene's alues so they fall within 0 and 1.
 If TRUE and you also give this function a scaleByGroup value (a set of column indexes in exprDataFrame), within-gene
 scaling will instead be done by taking the gene's mean value for that group of samples and subtracting that from its
