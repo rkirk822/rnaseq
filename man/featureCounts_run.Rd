@@ -7,7 +7,8 @@
 featureCounts_run(inFiles, annotFile,
   fcPath = "/opt/subread-1.6.0-MacOSX-x86_64/bin/", outDest = "./",
   outSuffix = "", runThreadN = 1, pairedEnd = FALSE,
-  annotFormat = "GTF", multimappers = FALSE, dispToText = FALSE)
+  isStrandSpecific = FALSE, annotFormat = "GTF", multimappers = FALSE,
+  dispToText = FALSE)
 }
 \arguments{
 \item{inFiles}{Character - BAM or SAM file list}
@@ -23,6 +24,8 @@ featureCounts_run(inFiles, annotFile,
 \item{runThreadN}{Numeric - How many cores to use}
 
 \item{pairedEnd}{Logical - Whether data is paired-end}
+
+\item{isStrandSpecific}{Logical - Strand-specific counting (reads will only be counted if they match the strand of the feature)}
 
 \item{annotFormat}{String - "GTF" or "SAF".  Format of annotation file.}
 

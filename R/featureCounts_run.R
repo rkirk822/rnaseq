@@ -8,6 +8,7 @@
 #' @param outSuffix String - will be appended to original filename (and followed by "_fcounts.txt")
 #' @param runThreadN Numeric - How many cores to use
 #' @param pairedEnd Logical - Whether data is paired-end
+#' @param isStrandSpecific Logical - Strand-specific counting (reads will only be counted if they match the strand of the feature)
 #' @param annotFormat String - "GTF" or "SAF".  Format of annotation file.
 #' @param multimappers Logical - Whether to count multi-mapping reads.  All reported alignments will be counted, using the 'NH' tag in the BAMs/SAMs.
 #' @param dispToText Logical - Whether to send messages that featureCounts normally displays to the screen, to a text file instead
@@ -21,7 +22,7 @@
 #' @export
 
 featureCounts_run = function(inFiles, annotFile, fcPath="/opt/subread-1.6.0-MacOSX-x86_64/bin/", outDest="./", outSuffix="", runThreadN=1,
-                             pairedEnd=FALSE, annotFormat="GTF", multimappers=FALSE, dispToText=FALSE) {
+                             pairedEnd=FALSE, isStrandSpecific=FALSE, annotFormat="GTF", multimappers=FALSE, dispToText=FALSE) {
 
     # Check arguments
     if ( !all(file.exists(inFiles)) ) {
@@ -45,6 +46,7 @@ featureCounts_run = function(inFiles, annotFile, fcPath="/opt/subread-1.6.0-MacO
             arguments = c(f, "-a", annotFile, "-o", fOut, "-T", runThreadN, "-F", annotFormat)
             if ( multimappers ) { arguments = c(arguments, "-M") }
             if ( pairedEnd ) { arguments = c(arguments, "-p") }
+            if ( isStrandSpecific ) { arguments = c(arguments, "-s") }
 
             # Get the counts
             tStart = proc.time()[3]

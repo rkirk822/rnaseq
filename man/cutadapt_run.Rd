@@ -8,10 +8,12 @@ cutadapt_run(readFilesIn, adapters = list(TruSeq_Universal =
   "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT", TruSeq_Index =
   "AGATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG"),
   cutadaptPath = "~/.local/bin/", outDest = "./", outSuffix = "",
-  qualityCutoff = c(0, 0), minLen = 0, nAdapt = 1, trimn = FALSE)
+  qualityCutoff = c(0, 0), minLen = 0, nAdapt = 1, trimn = FALSE,
+  readFilesInR2 = NULL, adaptersRev = list(TruSeq_Index_Rev =
+  "GTTCGTCTTCTGCCGTATGCTCTANNNNNNCACTGACCTCAAGTCTGCACACGAGAAGGCTAGA"))
 }
 \arguments{
-\item{readFilesIn}{Character - Fastq file list (can be gzipped)}
+\item{readFilesIn}{Character - files with sequences to trim; can be gzipped (if paired-end data, these are the R1 files)}
 
 \item{adapters}{List - Each element is an adapter sequence; element names are adapter names}
 
@@ -28,6 +30,8 @@ cutadapt_run(readFilesIn, adapters = list(TruSeq_Universal =
 \item{nAdapt}{Numeric - Cutadapt will assume there could be as many adapters as this on a given read}
 
 \item{trimn}{Logical - Whether to trim flanking Ns (unknown bases)}
+
+\item{readFilesInR2}{Character - The R2 files, if paired-end data}
 }
 \description{
 Trim reads using cutadapt.  Written using cutadapt v1.16.
@@ -36,18 +40,25 @@ Trim reads using cutadapt.  Written using cutadapt v1.16.
 Cutadapt's report, normally displayed in the terminal, goes to originalFileName_report.txt.  Keep these.  They're good if you need to quickly look back
 at an early stage of processing, and the count_reads function reads them to get a vector of total read counts so you can quickly plot counts per sample.
 That report includes the command line parameters, so whatever you use in this script as the adapter sequences, quality cutoff, etc, will appear there.
-TIME:
-For 5-6 GB fastq files, about 15m.
-For 9-10 GB, closer to 30m.
-For all the RORb files, total ~7.5hrs.
+
+TIME: 15-30m for 5-10 GB files.  So, generally a bunch of hours for a whole dataset, though small RNA is faster.
+
 Example at the command line (if you want to play with the parameters while looking at just one file, this might be easiest):
-TESTED THIS
 ~/.local/bin/cutadapt -a TruSeq_Index=AGATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG BF_RORbHTp2_1.fastq -o BF_RORbHTp2_1_trimmed.fastq --trim-n -q 20,20 -m 20 -n 3 > BF_RORbHTp2_1_report.txt
+Example using paired-end data.  Just (1) put in -A for each adapter to trim from R2s, (2) put both input filenames, and (3) following the R1 output file name, put -p <R2_filename>.
+adapterForward=AGATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNATCTCGTATGCCGTCTTCTGCTTG
+adapterRev=GTTCGTCTTCTGCCGTATGCTCTANNNNNNCACTGACCTCAAGTCTGCACACGAGAAGGCTAGA
+~/.local/bin/cutadapt -a TruSeq_Index=$adapterForward -A TruSeq_Index_Rev=$adapterRev CGTACG_S6_R1_001.fastq CGTACG_S6_R2_001.fastq -o CGTACG_S6_R1_001_trimmed.fastq -p CGTACG_S6_R1_001_trimmed.fastq --trim-n -q 20,20 -m 20 -n 3 > CGTACG_S6_report.txt
 }
 \examples{
-TESTED THIS
-fqs = list.files( paste(projectPath,"raw/",sep=""), pattern=".fastq" )
-cutadapt_run(paste(projectPath, "raw/", fqs, sep=""), outDest=paste(projectPath, "trimmed/", sep=""), qualityCutoff=c(20,20), minLen=20, nAdapt=3, trimn=TRUE)
+Single-end data:
+fastqs = dir( paste(projectPath,"raw/",sep=""), pattern=".fastq" )
+cutadapt_run(paste(projectPath, "raw/", fastqs, sep=""), outDest=paste(projectPath, "trimmed/", sep=""), qualityCutoff=c(20,20), minLen=20, nAdapt=3, trimn=TRUE)
+Paired-end data:
+fastqs=dir(paste(projectPath,'raw',sep=''), pattern='fastq', full.names=TRUE)
+r1s=fastqs[which(regexpr("R1",fastqs)>0)]
+r2s=fastqs[which(regexpr("R2",fastqs)>0)]
+cutadapt_run(r1s, outDest=paste(projectPath, "trimmed/", sep=""), qualityCutoff=c(20,20), minLen=20, nAdapt=3, trimn=TRUE, readFilesInR2=r2s)
 }
 \author{
 Emma Myers
